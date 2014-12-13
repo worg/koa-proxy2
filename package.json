@@ -32,6 +32,6 @@
   },
   "scripts": {
     "test": "mocha --harmony-generators --reporter spec",
-    "test-travis": "node --harmony-generators node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report html"
+    "test-travis": "node --harmony-generators node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report lcovonly"
   }
 }
