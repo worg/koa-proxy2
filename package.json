@@ -23,7 +23,6 @@
   },
   "devDependencies": {
     "express": "^4.10.6",
-    "istanbul": "^0.3.5",
     "istanbul-harmony": "^0.3.1",
     "koa": "^0.13.0",
     "mocha": "^2.0.1",
@@ -32,6 +31,6 @@
   },
   "scripts": {
     "test": "mocha --harmony-generators --reporter spec",
-    "test-travis": "node --harmony-generators node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report lcovonly"
+    "test-travis": "node --harmony-generators ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report lcovonly"
   }
 }
