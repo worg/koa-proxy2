@@ -1,15 +1,16 @@
 var assert =require('assert');
 var thunkify = require('thunkify');
 var request = thunkify(require('request'));
+var resolvePath = require('./utils/utils.js').resolvePath;
 
 var koaProxy = function(options) {
   assert.ok(options && Object === options.constructor, 'Options Object Required');
 
   return function* (next) {
-    if (Object.keys(options.map).indexOf(this.request.path) !== -1) {
+    if (resolvePath(this.request.path, options.map)) {
       var opts = {
         method: this.request.method,
-        url: options.map[this.request.path],
+        url: resolvePath(this.request.path, options.map),
         headers: this.request.header,
         body: this.request.body
       };

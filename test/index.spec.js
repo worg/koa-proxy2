@@ -36,7 +36,11 @@ describe('koa proxy', function () {
 
     app.use(koaProxy({
       map: {
-        '/proxy': 'http://127.0.0.1:1337/proxy'
+        '/proxy': 'http://127.0.0.1:1337',
+        '=/nodejs': 'http://127.0.0.1:1337',
+        '~^story': 'http://127.0.0.1:1337',
+        '~*story': 'http://127.0.0.1:1337',
+        '/slash': 'http://127.0.0.1:1337/'
       },
       keepQueryString: false
     }));
@@ -80,6 +84,35 @@ describe('koa proxy', function () {
     request
       .delete('/proxy')
       .expect('hello delete!')
+      .end(done);
+  });
+
+  it('should resolve equal flag style', function (done) {
+    request
+      .get('/nodejs')
+      .expect('hello nodejs!')
+      .end(done);
+  });
+
+  it('should resolve tilde style', function (done) {
+    request
+      .get('/story')
+      .expect('hello story lower!')
+      .end(done);
+  });
+
+  it('should resolve tilde asterisk style', function (done) {
+    request
+      .get('/STORYLOVE')
+      .expect('hello story upper!')
+      .end(done);
+  });
+
+
+  it('should resolve slash style', function (done) {
+    request
+      .get('/slash')
+      .expect('hello root!')
       .end(done);
   });
 
