@@ -142,11 +142,44 @@ describe('koa proxy with query string', function () {
     request = supertest(app.callback());
   });
 
-  it('should reserve query string with url', function () {
+  it('should reserve query string with url', function (done) {
     request
       .get('/proxy?love=story')
-      .expect('content-type', 'application/json')
-      .expect({love:'story'});
+      .expect('content-type', 'application/json; charset=utf-8')
+      .expect({"love":"story"})
+      .end(done);
+  });
+
+  after(function () {
+    target.close();
+  });
+});
+
+describe('koa proxy error', function () {
+  var target, app, request;
+
+  before(function () {
+    target = backServer.listen(1337);
+  });
+
+  before(function() {
+    app = koa();
+
+    app.use(koaProxy({
+      map: {
+        '/proxyAgent': 'http://127.0.0.1:1337'
+      },
+      keepQueryString: false
+    }));
+
+    request = supertest(app.callback());
+  });
+
+  it('should resolved', function (done) {
+    request
+      .get('/proxyAgent')
+      .expect(404)
+      .end(done);
   });
 
   after(function () {
