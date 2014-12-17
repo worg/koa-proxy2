@@ -19,7 +19,7 @@ var koaProxy = function(options) {
       opts.qs = !!options.keepQueryString ? this.request.query : {};
 
       var response = yield request(opts);
-      if (response[0].body.indexOf('Cannot GET ') !== -1) {
+      if (typeof response[0].body === 'string' && response[0].body.indexOf('Cannot GET ') !== -1) {
         return this.response.status = response[0].statusCode;
       }
       this.response.set(response[0].headers);
