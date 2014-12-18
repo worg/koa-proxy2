@@ -26,6 +26,7 @@
     "express": "^4.10.6",
     "istanbul-harmony": "^0.3.1",
     "koa": "^0.13.0",
+    "koa-body": "^0.4.0",
     "mocha": "^2.0.1",
     "should": "^4.4.1",
     "supertest": "^0.15.0"
