@@ -1,7 +1,10 @@
 var path = require('path');
 var express =require('express');
+var bodyParser = require('body-parser');
 
 var app = express();
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 app.get('/', function(req, res) {
   res.send('hello root!');
@@ -34,6 +37,23 @@ app.put('/proxy', function(req, res) {
 
 app.delete('/proxy', function(req, res) {
   res.send('hello delete!');
+});
+
+var  serialize = function(obj) {
+  if (!obj.constructor || !(Object == obj.constructor)) return '';
+  var result = [];
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      result.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
+    }
+  }
+  return result.join('&');
+};
+
+app.post('/content', function(req, res) {
+  if (Object.keys(req.body).length === 0) return res.send(new Buffer(0));
+  if (req.is('application/x-www-form-urlencoded')) return res.send(serialize(req.body));
+  if (req.is('json')) return res.send(req.body);
 });
 
 module.exports = app;

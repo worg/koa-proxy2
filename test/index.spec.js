@@ -1,5 +1,6 @@
 var koa =require('koa');
 var koaProxy = require('../index.js');
+var koaBody = require('koa-body');
 var should = require('should');
 var supertest = require('supertest');
 var backServer = require('./mock/backServer.js');
@@ -24,7 +25,7 @@ describe('koa proxy function', function () {
   });
 });
 
-describe('koa proxy', function () {
+describe.only('koa proxy', function () {
   var target, app, request;
 
   before(function () {
@@ -33,6 +34,8 @@ describe('koa proxy', function () {
 
   before(function() {
     app = koa();
+
+    app.use(koaBody());
 
     app.use(koaProxy({
       map: {
@@ -132,6 +135,8 @@ describe('koa proxy with query string', function () {
   before(function() {
     app = koa();
 
+    app.use(koaBody());
+
     app.use(koaProxy({
       map: {
         '/proxy': 'http://127.0.0.1:1337/proxy'
@@ -155,6 +160,57 @@ describe('koa proxy with query string', function () {
   });
 });
 
+describe('koa proxy content', function () {
+  var target, app, request;
+
+  before(function () {
+    target = backServer.listen(1337);
+  });
+
+  before(function() {
+    app = koa();
+
+    app.use(koaBody());
+
+    app.use(koaProxy({
+      map: {
+        '/content': 'http://127.0.0.1:1337/content'
+      },
+      keepQueryString: false
+    }));
+
+    request = supertest(app.callback());
+  });
+
+  it('should resolve json body', function (done) {
+    request
+      .post('/content')
+      .send({title: 'story'})
+      .expect({"title":"story"})
+      .end(done);
+  });
+
+  it('should resolve form body', function (done) {
+    request
+      .post('/content')
+      .send('title=story&category=education')
+      .expect('title=story&category=education')
+      .end(done);
+  });
+
+  it('should resolve null body', function (done) {
+    request
+      .post('/content')
+      .expect(200)
+      .expect('')
+      .end(done);
+  });
+
+  after(function () {
+    target.close();
+  });
+});
+
 describe('koa proxy error', function () {
   var target, app, request;
 
@@ -164,6 +220,8 @@ describe('koa proxy error', function () {
 
   before(function() {
     app = koa();
+
+    app.use(koaBody());
 
     app.use(koaProxy({
       map: {

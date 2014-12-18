@@ -1,5 +1,9 @@
 var should = require('should');
-var resolvePath = require('../utils/utils.js').resolvePath;
+var utils = require('../utils/utils.js');
+var koa = require('koa');
+var koaBody = require('koa-body');
+var supertest = require('supertest');
+var resolvePath = utils.resolvePath;
 
 describe('resolvePath function', function () {
   var map;
@@ -59,4 +63,60 @@ describe('resolvePath function', function () {
   after(function () {
     map = null;
   });
+});
+
+describe('utils resolve body', function () {
+  var app, request;
+  beforeEach(function () {
+    app = koa();
+    app.use(koaBody());
+    app.use(function *() {
+      this.body = utils.resolveBody(this.request);
+    })
+  });
+
+  beforeEach(function () {
+    request = supertest(app.callback());
+  });
+
+  it('should resolve false related body', function (done) {
+    request
+      .post('/')
+      .expect('')
+      .end(done);
+  });
+
+  it('should resolve json body', function (done) {
+    request
+      .post('/')
+      .send({title: 'story'})
+      .expect({"title":"story"})
+      .end(done);
+  });
+
+  it('should resolve form body', function (done) {
+    request
+      .post('/')
+      .send('title=story&category=education')
+      .expect('title=story&category=education')
+      .end(done);
+  });
+});
+
+describe('utils serialize', function () {
+  var origin = {
+    "title": "story",
+    "category": "education"
+  };
+  var compare = ["hello"];
+
+  it('should resolve object', function () {
+    var result = utils.serialize(origin);
+    result.should.equal('title=story&category=education');
+  });
+
+  it('should never resolve non-object', function() {
+    var result = utils.serialize(compare);
+    result.should.equal('');
+  })
 });

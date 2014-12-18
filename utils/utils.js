@@ -37,4 +37,21 @@ utils.resolvePath = function(path, map) {
   return false;
 };
 
+utils.resolveBody = function(request) {
+  if (request.is('application/x-www-form-urlencoded')) return utils.serialize(request.body);
+  if (request.is('json')) return request.body;
+  return '';
+};
+
+utils.serialize = function(obj) {
+  if (!(Object == obj.constructor)) return '';
+  var result = [];
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      result.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
+    }
+  }
+  return result.join('&');
+};
+
 module.exports = utils;
