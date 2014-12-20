@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/bornkiller/koa-proxy2",
   "dependencies": {
+    "co-body": "^1.0.0",
     "request": "^2.51.0",
     "thunkify": "^2.1.2"
   },

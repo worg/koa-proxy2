@@ -1,12 +1,16 @@
 var assert =require('assert');
 var thunkify = require('thunkify');
 var request = thunkify(require('request'));
+var parse = require('co-body');
 var utils = require('./utils/utils.js');
 
 var koaProxy = function(options) {
   assert.ok(options && Object === options.constructor, 'Options Object Required');
 
   return function* (next) {
+    if (!this.request.body) {
+      if (this.is(['json', 'urlencoded'])) this.request.body = yield parse(this);
+    }
     if (utils.resolvePath(this.request.path, options.map)) {
       var opts = {
         method: this.request.method,

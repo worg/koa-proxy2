@@ -25,7 +25,7 @@ describe('koa proxy function', function () {
   });
 });
 
-describe.only('koa proxy', function () {
+describe('koa proxy', function () {
   var target, app, request;
 
   before(function () {
@@ -34,8 +34,6 @@ describe.only('koa proxy', function () {
 
   before(function() {
     app = koa();
-
-    app.use(koaBody());
 
     app.use(koaProxy({
       map: {
@@ -135,8 +133,6 @@ describe('koa proxy with query string', function () {
   before(function() {
     app = koa();
 
-    app.use(koaBody());
-
     app.use(koaProxy({
       map: {
         '/proxy': 'http://127.0.0.1:1337/proxy'
@@ -169,8 +165,6 @@ describe('koa proxy content', function () {
 
   before(function() {
     app = koa();
-
-    app.use(koaBody());
 
     app.use(koaProxy({
       map: {
@@ -220,8 +214,6 @@ describe('koa proxy error', function () {
 
   before(function() {
     app = koa();
-
-    app.use(koaBody());
 
     app.use(koaProxy({
       map: {
