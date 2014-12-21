@@ -1,6 +1,6 @@
 {
   "name": "koa-proxy2",
-  "version": "0.4.0",
+  "version": "0.4.5",
   "description": "Make it convenience for mock nginx trick when use angular.",
   "main": "index.js",
   "repository": {
