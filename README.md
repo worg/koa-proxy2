@@ -12,8 +12,8 @@ Make it convenience for mock nginx trick when use angular.
 use angular and nginx to develop web project, it make me feel helpless when communicate with real backend API through nginx, while I only mock static server, proxy server not included. To avoid directly modify the code in the nginx server, maybe mock proxy with nodejs become necessary. 
 
 ## Usage
-For some reason, you must use body parse middleware now, like `koa-body` or something else, and will relieve
-the limitation next important version.
+Till now, you don't have to use body parse middleware, like `koa-body` or something else. For some reason, it
+doesn't support `multipart/form-data`, but only `json`, `urlencoded`.
 
 Till now, only two options provided:
 
@@ -45,11 +45,9 @@ Assume all real backend api follow the pattern `/v1/*`, all static files are in 
 var path = require('path');
 var koa = require('koa');
 var serve = require('koa-static');
-var koaBody = require('koa-body');
 var koaProxy = require('koa-proxy2');
 var app = koa();
 
-app.use(koaBody());
 app.use(koaProxy({
   map: {
     '~/v1': 'http://127.0.0.1'
@@ -65,6 +63,8 @@ app.listen(1336);
 ```
 
 ## Change Log
++ 2014/12/21 v0.4.5
+Remove `koa-body` dependency, as well as `multipart/form-data` support.
 + 2014/12/18 v0.4.0
 Fix content transfer bugs.
 
