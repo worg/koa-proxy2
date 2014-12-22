@@ -2,6 +2,7 @@ var should = require('should');
 var utils = require('../utils/utils.js');
 var koa = require('koa');
 var koaBody = require('koa-body');
+var path = require('path');
 var supertest = require('supertest');
 var resolvePath = utils.resolvePath;
 
@@ -99,6 +100,54 @@ describe('utils resolve body', function () {
       .post('/')
       .send('title=story&category=education')
       .expect('title=story&category=education')
+      .end(done);
+  });
+});
+
+describe('utils resolve multipart', function () {
+  var app, request;
+  beforeEach(function () {
+    app = koa();
+    app.use(function *() {
+      this.body = yield utils.resolveMultipart(this.req);
+    })
+  });
+
+  beforeEach(function () {
+    request = supertest(app.callback());
+  });
+
+  it('should resolve fields part', function (done) {
+    request
+      .post('/')
+      .field('title', 'love')
+      .field('author', 'bornkiller')
+      .expect({"title" : "love", "author" : "bornkiller"})
+      .end(done);
+  });
+});
+
+describe('utils resolve multipart', function () {
+  var app, request, stream;
+  beforeEach(function () {
+    app = koa();
+    app.use(function *() {
+      stream = yield utils.resolveMultipart(this.req);
+      this.body = stream.love;
+    })
+  });
+
+  beforeEach(function () {
+    request = supertest(app.callback());
+  });
+
+  it('should resolve file part', function (done) {
+    request
+      .post('/')
+      .attach('love', path.join(__dirname, './mock/love.txt'), 'love.txt')
+      .expect(function(res) {
+        (res.text).should.equal('I love you forever!')
+      })
       .end(done);
   });
 });

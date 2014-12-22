@@ -3,6 +3,8 @@ var koaProxy = require('../index.js');
 var koaBody = require('koa-body');
 var should = require('should');
 var supertest = require('supertest');
+var path =require('path');
+var fs = require('fs');
 var backServer = require('./mock/backServer.js');
 
 describe('koa proxy function', function () {
@@ -168,7 +170,8 @@ describe('koa proxy content', function () {
 
     app.use(koaProxy({
       map: {
-        '/content': 'http://127.0.0.1:1337/content'
+        '/content': 'http://127.0.0.1:1337/content',
+        '/upload': 'http://127.0.0.1:1337/upload'
       },
       keepQueryString: false
     }));
@@ -190,6 +193,22 @@ describe('koa proxy content', function () {
       .send('title=story&category=education')
       .expect('title=story&category=education')
       .end(done);
+  });
+
+  it('should resolve multipart body', function (done) {
+    request
+      .post('/upload')
+      .field('title', 'koa-proxy')
+      .field('content', 'kiss you')
+      .attach('love', fs.createReadStream(path.join(__dirname, 'mock/love.txt')))
+      .attach('youth', fs.createReadStream(path.join(__dirname, 'mock/youth.txt')))
+      .expect(function(res) {
+        (res.body).should.have.property('title', 'koa-proxy');
+        (res.body).should.have.property('content', 'kiss you');
+        (res.body).should.have.property('love', 'I love you forever!');
+        (res.body).should.have.property('youth', 'youth is not a time of life!');
+      })
+     .end(done);
   });
 
   it('should resolve null body', function (done) {

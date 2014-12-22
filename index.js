@@ -8,26 +8,45 @@ var koaProxy = function(options) {
   assert.ok(options && Object === options.constructor, 'Options Object Required');
 
   return function* (next) {
+    var bodyEnabled = true;
     if (!this.request.body) {
-      if (this.is(['json', 'urlencoded'])) this.request.body = yield parse(this);
+      if (this.is('json')) this.request.body = yield parse.json(this);
+      if (this.is('urlencoded')) this.request.body = yield parse.form(this);
+      if (this.is('multipart')) {
+        bodyEnabled = false;
+        this.request.body = yield utils.resolveMultipart(this.req);
+      }
     }
-    if (utils.resolvePath(this.request.path, options.map)) {
+    if (utils.resolvePath(this.path, options.map)) {
       var opts = {
-        method: this.request.method,
-        url: utils.resolvePath(this.request.path, options.map),
-        headers: this.request.header,
-        body: utils.resolveBody(this.request)
+        method: this.method,
+        url: utils.resolvePath(this.path, options.map),
+        headers: this.header
       };
 
-      opts.json = this.request.is('json') === 'json';
+      opts.body = bodyEnabled ? utils.resolveBody(this.request) : null;
+      opts.formData = !bodyEnabled ? this.request.body : null;
+      opts.json = this.is('json') === 'json';
       opts.qs = !!options.keepQueryString ? this.request.query : {};
 
-      var response = yield request(opts);
+      var response =
+        this.is(['json', 'urlencoded']) ?
+        yield request(opts) :
+        yield request({
+          method: opts.method,
+          url: opts.url,
+          header: opts.headers,
+          body: opts.body,
+          formData: opts.formData,
+          json: opts.json,
+          qs: opts.qs
+        });
+
       if (typeof response[0].body === 'string' && response[0].body.indexOf('Cannot GET ') !== -1) {
-        return this.response.status = response[0].statusCode;
+        return this.status = response[0].statusCode;
       }
-      this.response.set(response[0].headers);
-      this.response.body = response[0].body;
+      this.set(response[0].headers);
+      this.body = response[0].body;
       return null;
     }
 

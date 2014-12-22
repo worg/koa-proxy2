@@ -1,6 +1,8 @@
 var path = require('path');
+var fs = require('fs');
 var express =require('express');
 var bodyParser = require('body-parser');
+var formidable = require('formidable');
 
 var app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -39,7 +41,7 @@ app.delete('/proxy', function(req, res) {
   res.send('hello delete!');
 });
 
-var  serialize = function(obj) {
+var serialize = function(obj) {
   if (!obj.constructor || !(Object == obj.constructor)) return '';
   var result = [];
   for (var key in obj) {
@@ -54,6 +56,19 @@ app.post('/content', function(req, res) {
   if (Object.keys(req.body).length === 0) return res.send(new Buffer(0));
   if (req.is('application/x-www-form-urlencoded')) return res.send(serialize(req.body));
   if (req.is('json')) return res.send(req.body);
+});
+
+app.post('/upload', function(req, res) {
+  var form = new formidable.IncomingForm();
+
+  form.parse(req, function(err, fields, files) {
+    for (var key in files) {
+      if (files.hasOwnProperty(key)) {
+        fields[key] = fs.readFileSync(files[key].path).toString();
+      }
+    }
+    res.json(fields);
+  });
 });
 
 module.exports = app;

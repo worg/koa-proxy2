@@ -1,5 +1,8 @@
 var assert = require('assert');
+var formidable = require('formidable');
+var fs = require('fs');
 var utils = {};
+
 utils.resolvePath = function(path, map) {
   assert.ok(map && Object === map.constructor, 'Map Object Required');
 
@@ -52,6 +55,27 @@ utils.serialize = function(obj) {
     }
   }
   return result.join('&');
+};
+
+utils.resolveMultipart = function(req) {
+  return function(done) {
+    var data = {};
+    var form = new formidable.IncomingForm();
+    form
+      .on('field', function(name, value) {
+        data[name] = value;
+      })
+      .on('file', function(name, file) {
+        data[name] = fs.createReadStream(file.path)
+      })
+      .on('error', function(error) {
+        done(error);
+      })
+      .on('end', function() {
+        done(null, data);
+      });
+    form.parse(req);
+  }
 };
 
 module.exports = utils;
