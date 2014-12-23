@@ -2,6 +2,7 @@ var assert =require('assert');
 var thunkify = require('thunkify');
 var request = thunkify(require('request'));
 var parse = require('co-body');
+var util =require('util');
 var utils = require('./utils/utils.js');
 
 var koaProxy = function(options) {
@@ -9,14 +10,16 @@ var koaProxy = function(options) {
 
   return function* (next) {
     var bodyEnabled = true;
-    if (!this.request.body) {
-      if (this.is('json')) this.request.body = yield parse.json(this);
-      if (this.is('urlencoded')) this.request.body = yield parse.form(this);
+    if (!this.request.body && this.method !== 'get' && this.method !== 'delete') {
+      if (this.is('json', 'urlencoded')) this.request.body = yield parse(this);
       if (this.is('multipart')) {
         bodyEnabled = false;
-        this.request.body = yield utils.resolveMultipart(this.req);
+        this.request.body = yield utils.resolveMultipart(this, options);
       }
     }
+
+    if (util.isError(this.request.body)) return this.status = 500;
+
     if (utils.resolvePath(this.path, options.map)) {
       var opts = {
         method: this.method,

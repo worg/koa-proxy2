@@ -109,7 +109,8 @@ describe('utils resolve multipart', function () {
   beforeEach(function () {
     app = koa();
     app.use(function *() {
-      this.body = yield utils.resolveMultipart(this.req);
+      if (this.path === '/explicit') this.body = yield utils.resolveMultipart(this.req);
+      if (this.path === '/implicit') this.body = yield utils.resolveMultipart(this);
     })
   });
 
@@ -117,9 +118,18 @@ describe('utils resolve multipart', function () {
     request = supertest(app.callback());
   });
 
-  it('should resolve fields part', function (done) {
+  it('should resolve fields part explicit', function (done) {
     request
-      .post('/')
+      .post('/explicit')
+      .field('title', 'love')
+      .field('author', 'bornkiller')
+      .expect({"title" : "love", "author" : "bornkiller"})
+      .end(done);
+  });
+
+  it('should resolve fields part implicit', function (done) {
+    request
+      .post('/implicit')
       .field('title', 'love')
       .field('author', 'bornkiller')
       .expect({"title" : "love", "author" : "bornkiller"})

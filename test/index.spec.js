@@ -211,7 +211,7 @@ describe('koa proxy content', function () {
      .end(done);
   });
 
-  it('should resolve null body', function (done) {
+  it('should transfer other body', function (done) {
     request
       .post('/content')
       .expect(200)

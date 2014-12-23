@@ -14,7 +14,7 @@ use angular and nginx to develop web project, it make me feel helpless when comm
 ## Usage
 With time passing by, `koa-proxy2` integrate with body parser, therefore you don't have to use body parse middleware, like `koa-body` or something else, while never cause problem if you used for some reason. It only support `json`, `urlencoded`, `multipart/form-data` proxy work.
 
-Till now, only two options provided:
+Till now, two options provided for proxy-pass:
 
 ```javascript
 {
@@ -36,6 +36,10 @@ For above example:
 request to `/proxy` will resolve to request to `http://127.0.0.1/proxy`;
 request to `/slash` will resolve to request to `http://127.0.0.1/`, rather than `http://127.0.0.1/slash`.
 `keepQueryString` to judge if reserve the query string after path.
+
+
+`formidable` module is used for `multipart/form-data` body parse, you can pass in `formidable` options with 
+the proxy-pass options, see ![https://github.com/felixge/node-formidable](https://github.com/felixge/node-formidable)
 
 ## Practice
 Assume all real backend api follow the pattern `/v1/*`, all static files are in `./static`, you will need:
@@ -62,6 +66,8 @@ app.listen(1336);
 ```
 
 ## Change Log
++ 2014/12/24 v0.5.5
+Add `multipart/form-data` body parser error handler, support `formidable` module options pass.
 + 2014/12/23 v0.5.0
 Add `multipart/form-data` mime type support.
 + 2014/12/21 v0.4.5

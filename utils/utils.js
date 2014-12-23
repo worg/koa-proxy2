@@ -57,10 +57,12 @@ utils.serialize = function(obj) {
   return result.join('&');
 };
 
-utils.resolveMultipart = function(req) {
+utils.resolveMultipart = function(req, opts) {
+  req = req.req || req;
+
   return function(done) {
     var data = {};
-    var form = new formidable.IncomingForm();
+    var form = new formidable.IncomingForm(opts);
     form
       .on('field', function(name, value) {
         data[name] = value;
