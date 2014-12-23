@@ -1,8 +1,23 @@
+/**
+ * Export several useful method
+ * @module utils
+ */
+
+/**
+ * Module dependencies
+ */
+
 var assert = require('assert');
 var formidable = require('formidable');
 var fs = require('fs');
 var utils = {};
 
+/**
+ * Judge map rules match, return final URL when match, false when mismatch
+ * @param path
+ * @param map
+ * @returns {boolean|string}
+ */
 utils.resolvePath = function(path, map) {
   assert.ok(map && Object === map.constructor, 'Map Object Required');
 
@@ -40,12 +55,23 @@ utils.resolvePath = function(path, map) {
   return false;
 };
 
+/**
+ * revert parsed body into original structure
+ * @param {object} request - koa context or origin request
+ * @returns {string|object|null}
+ */
 utils.resolveBody = function(request) {
+  request = request.request || request;
   if (request.is('application/x-www-form-urlencoded')) return utils.serialize(request.body);
   if (request.is('json')) return request.body;
-  return '';
+  return null;
 };
 
+/**
+ * serialize object into x-www-form-urlencoded string
+ * @param {object} obj - parsed body
+ * @returns {string}
+ */
 utils.serialize = function(obj) {
   if (!(Object == obj.constructor)) return '';
   var result = [];
@@ -57,6 +83,12 @@ utils.serialize = function(obj) {
   return result.join('&');
 };
 
+/**
+ * parse multipart/form-data body and stream next
+ * @param {object} req - koa context or koa request wrapper
+ * @param {object} opts - options pass to formidable module
+ * @returns {Function} - yieldable function
+ */
 utils.resolveMultipart = function(req, opts) {
   req = req.req || req;
 
