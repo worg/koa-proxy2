@@ -12,7 +12,7 @@ Make it convenience for mock nginx trick when use angular.
 use angular and nginx to develop web project, it make me feel helpless when communicate with real backend API through nginx, while I only mock static server, proxy server not included. To avoid directly modify the code in the nginx server, maybe mock proxy with nodejs become necessary. 
 
 ## Usage
-With time passing by, `koa-proxy2` integrate with body parser, therefore you don't have to use body parse middleware, like `koa-body` or something else, while never cause problem if you used for some reason. It only support `json`, `urlencoded`, `multipart/form-data` proxy work.
+With time passing by, `koa-proxy2` integrate with body parser, therefore you don't have to use body parse middleware, like `koa-body` or something else, while never cause problem if you used for some reason. It support `json`, `urlencoded`, `multipart/form-data` proxy work well.
 
 Till now, two options provided for proxy-pass:
 
@@ -39,7 +39,7 @@ request to `/slash` will resolve to request to `http://127.0.0.1/`, rather than 
 
 
 `formidable` module is used for `multipart/form-data` body parse, you can pass in `formidable` options with 
-the proxy-pass options, see ![https://github.com/felixge/node-formidable](https://github.com/felixge/node-formidable)
+the proxy-pass options, see [https://github.com/felixge/node-formidable](https://github.com/felixge/node-formidable)
 
 ## Practice
 Assume all real backend api follow the pattern `/v1/*`, all static files are in `./static`, you will need:
