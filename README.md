@@ -48,10 +48,10 @@ Assume all real backend api follow the pattern `/v1/*`, all static files are in 
 var path = require('path');
 var koa = require('koa');
 var serve = require('koa-static');
-var koaProxy = require('koa-proxy2');
+var proxy = require('koa-proxy2');
 var app = koa();
 
-app.use(koaProxy({
+app.use(proxy({
   map: {
     '~/v1': 'http://127.0.0.1'
   },
@@ -66,6 +66,8 @@ app.listen(1336);
 ```
 
 ## Change Log
++ 2015/02/02 v0.6.0
+Remove unnecessary dependent package, fix cookie transfer fatal BUG.
 + 2014/12/24 v0.5.5
 Add `multipart/form-data` body parser error handler, support `formidable` module options pass.
 + 2014/12/23 v0.5.0
