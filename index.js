@@ -54,18 +54,7 @@ var koaProxy = function(options) {
 
 
       // comply the proxy
-      var response =
-        this.is(['json', 'urlencoded']) ?
-        yield request(opts) :
-        yield request({
-          method: opts.method,
-          url: opts.url,
-          header: opts.headers,
-          body: opts.body,
-          formData: opts.formData,
-          json: opts.json,
-          qs: opts.qs
-        });
+      var response = yield request(opts);
 
       // respond client
       if (typeof response[0].body === 'string' && response[0].body.indexOf('Cannot GET ') !== -1) {
