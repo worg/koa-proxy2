@@ -1,13 +1,13 @@
-var koa =require('koa');
-var koaProxy = require('../index.js');
-var should = require('should');
-var supertest = require('supertest');
 var path =require('path');
 var fs = require('fs');
+var koa =require('koa');
+var should = require('should');
+var supertest = require('supertest');
+var koaProxy = require('../index.js');
 var utils = require('../utils/utils.js');
 var backServer = require('./mock/backServer.js');
 
-describe('koa proxy function', function () {
+describe('koa proxy options', function () {
   var app;
 
   beforeEach(function () {
@@ -126,15 +126,14 @@ describe('koa proxy', function () {
 });
 
 describe('koa proxy with query string', function () {
-  var target, app, request;
+  var target, app;
 
   before(function () {
     target = backServer.listen(1337);
   });
 
-  before(function() {
+  it('should reserve query string with url when enabled', function (done) {
     app = koa();
-
     app.use(koaProxy({
       map: {
         '/proxy': 'http://127.0.0.1:1337/proxy'
@@ -142,14 +141,25 @@ describe('koa proxy with query string', function () {
       keepQueryString: true
     }));
 
-    request = supertest(app.callback());
-  });
-
-  it('should reserve query string with url', function (done) {
-    request
+    supertest(app.callback())
       .get('/proxy?love=story')
       .expect('content-type', 'application/json; charset=utf-8')
       .expect({"love":"story"})
+      .end(done);
+  });
+
+  it('should remove query string with url when disabled', function (done) {
+    app = koa();
+    app.use(koaProxy({
+      map: {
+        '/proxy': 'http://127.0.0.1:1337/proxy'
+      },
+      keepQueryString: false
+    }));
+
+    supertest(app.callback())
+      .get('/proxy?love=story')
+      .expect("hello get!")
       .end(done);
   });
 
