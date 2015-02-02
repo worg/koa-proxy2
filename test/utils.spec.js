@@ -5,6 +5,7 @@ var koaBody = require('koa-body');
 var path = require('path');
 var supertest = require('supertest');
 var resolvePath = utils.resolvePath;
+var fs = require('fs');
 
 describe('resolvePath function', function () {
   var map;
@@ -162,20 +163,35 @@ describe('utils resolve multipart', function () {
   });
 });
 
-describe('utils serialize', function () {
-  var origin = {
-    "title": "story",
-    "category": "education"
-  };
-  var compare = ["hello"];
-
-  it('should resolve object', function () {
+describe('utils methods', function () {
+  it('serialize method should resolve object', function () {
+    var origin = {
+      "title": "story",
+      "category": "education"
+    };
     var result = utils.serialize(origin);
     result.should.equal('title=story&category=education');
   });
 
-  it('should never resolve non-object', function() {
+  it('serialize method should never resolve non-object', function() {
+    var compare = ["hello"];
     var result = utils.serialize(compare);
     result.should.equal('');
-  })
+  });
+
+  it('objectNormalize method should transform multipart object', function () {
+    var content = {
+      title: 'kiss you',
+      love: fs.readFileSync(path.join(__dirname, 'mock/love.txt')),
+    };
+    var result = utils.objectNormalize(content);
+    result.should.have.properties({
+      title: 'kiss you',
+      love: 'I love you forever!'
+    });
+  });
+
+  it('objectNormalize method should handle other variables', function () {
+    utils.objectNormalize('').should.equal('');
+  });
 });

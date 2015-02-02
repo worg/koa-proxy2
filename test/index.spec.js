@@ -1,10 +1,10 @@
 var koa =require('koa');
 var koaProxy = require('../index.js');
-var koaBody = require('koa-body');
 var should = require('should');
 var supertest = require('supertest');
 var path =require('path');
 var fs = require('fs');
+var utils = require('../utils/utils.js');
 var backServer = require('./mock/backServer.js');
 
 describe('koa proxy function', function () {
@@ -159,45 +159,42 @@ describe('koa proxy with query string', function () {
 });
 
 describe('koa proxy content', function () {
-  var target, app, request;
-
-  before(function () {
-    target = backServer.listen(1337);
-  });
+  var app, request;
 
   before(function() {
     app = koa();
 
     app.use(koaProxy({
-      map: {
-        '/content': 'http://127.0.0.1:1337/content',
-        '/upload': 'http://127.0.0.1:1337/upload'
-      },
+      map: {},
       keepQueryString: false
     }));
+
+    app.use(function *() {
+      this.body = utils.objectNormalize(this.request.body);
+    });
 
     request = supertest(app.callback());
   });
 
   it('should resolve json body', function (done) {
     request
-      .post('/content')
-      .send({title: 'story'})
+      .post('/')
+      .send({"title": "story"})
       .expect({"title":"story"})
       .end(done);
   });
 
   it('should resolve form body', function (done) {
     request
-      .post('/content')
+      .post('/')
       .send('title=story&category=education')
-      .expect('title=story&category=education')
+      .expect({"title":"story", "category":"education"})
       .end(done);
   });
 
   it('should resolve multipart body', function (done) {
     request
-      .post('/upload')
+      .post('/')
       .field('title', 'koa-proxy')
       .field('content', 'kiss you')
       .attach('love', fs.createReadStream(path.join(__dirname, 'mock/love.txt')))
@@ -213,18 +210,13 @@ describe('koa proxy content', function () {
 
   it('should transfer other body', function (done) {
     request
-      .post('/content')
-      .expect(200)
+      .post('/')
       .expect('')
       .end(done);
   });
-
-  after(function () {
-    target.close();
-  });
 });
 
-describe('koa proxy error', function () {
+describe('koa proxy 404 error', function () {
   var target, app, request;
 
   before(function () {
@@ -236,9 +228,8 @@ describe('koa proxy error', function () {
 
     app.use(koaProxy({
       map: {
-        '/proxyAgent': 'http://127.0.0.1:1337'
-      },
-      keepQueryString: false
+        '/agent': 'http://127.0.0.1:1337'
+      }
     }));
 
     request = supertest(app.callback());
@@ -246,7 +237,7 @@ describe('koa proxy error', function () {
 
   it('should resolved', function (done) {
     request
-      .get('/proxyAgent')
+      .get('/agent')
       .expect(404)
       .end(done);
   });
