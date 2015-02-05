@@ -14,7 +14,7 @@ use angular and nginx to develop web project, it make me feel helpless when comm
 ## Usage
 With time passing by, `koa-proxy2` integrate with body parser, therefore you don't have to use body parse middleware, like `koa-body` or something else, while never cause problem if you used for some reason. It support `json`, `urlencoded`, `multipart/form-data` proxy work well.
 
-Till now, two options provided for proxy-pass:
+Till now, options below provided for proxy-pass:
 
 ```javascript
 {
@@ -25,17 +25,28 @@ Till now, two options provided for proxy-pass:
 	'~*story': 'http://127.0.0.1',
 	'/slash': 'http://127.0.0.1/'
   },
-  keepQueryString: false
+  keepQueryString: false,
+  transformResponse: function() {
+    if (this.path === '/transform') {
+      this.type = 'text';
+      this.body = 'transformed plain text'
+    }
+  }
 }
 ```
 
-`map` the proxy rules, just like nginx style. `/proxy` is the same as `=/proxy`, `~` is regular expression match case sensitive, `~*` is almost the same as `~`, except case insensitive. when path map domain address, the final 
-target URL will keep the request path, otherwise will ignore the path.
+`map` the proxy rules, just like nginx style.
 
 For above example:
-request to `/proxy` will resolve to request to `http://127.0.0.1/proxy`;
-request to `/slash` will resolve to request to `http://127.0.0.1/`, rather than `http://127.0.0.1/slash`.
+
+`/proxy` is the same as `=/proxy`, `~` is regular expression match case sensitive, `~*` is almost the same as `~`, except case insensitive. when path map domain address, the final target URL will keep the request path, otherwise will
+ignore the path.
+
+request to `/proxy` will resolve to request to `http://127.0.0.1/proxy`; request to `/slash` will resolve to request to `http://127.0.0.1/`, rather than http://127.0.0.1/slash`.
+
 `keepQueryString` to judge if reserve the query string after path.
+
+`transformResponse` to transform the response when send back the client, inside the function, `this` point to `koa` context, so you can modify the response as  you think.
 
 
 `formidable` module is used for `multipart/form-data` body parse, you can pass in `formidable` options with 
@@ -66,6 +77,8 @@ app.listen(1336);
 ```
 
 ## Change Log
++ 2015/02/06 v0.6.5
+Add `transformResponse` options for response transform.
 + 2015/02/02 v0.6.0
 Remove unnecessary dependent package, fix cookie transfer fatal BUG.
 + 2014/12/24 v0.5.5
