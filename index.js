@@ -62,6 +62,7 @@ var koaProxy = function(options) {
       }
       this.set(response[0].headers);
       this.body = response[0].body;
+      if (typeof options.transformResponse === 'function') options.transformResponse.apply(this);
       return null;
     }
 
