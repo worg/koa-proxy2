@@ -34,4 +34,11 @@ app.delete('/proxy', function(req, res) {
   res.send('hello delete!');
 });
 
+app.get('/transform', function(req, res) {
+  res.json({
+    "title": "love is color blind",
+    "content": "transform should resolve the content"
+  })
+});
+
 module.exports = app;

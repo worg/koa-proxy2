@@ -94,4 +94,12 @@ describe('utils methods', function () {
   it('objectNormalize method should handle other variables', function () {
     utils.objectNormalize('').should.equal('');
   });
+
+  it('merge method should merge two object', function () {
+    var destiny = { "title" : "love is color blind", "content": "never give up" };
+    var source = { "title" : "we are the champion", "footer" : "2015-02-06" };
+    var result = utils.merge(destiny, source);
+    result.should.have.property("title", "we are the champion");
+    result.should.have.property("footer", "2015-02-06");
+  });
 });

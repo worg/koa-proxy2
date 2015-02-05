@@ -43,9 +43,16 @@ describe('koa proxy', function () {
         '=/nodejs': 'http://127.0.0.1:1337',
         '~^story': 'http://127.0.0.1:1337',
         '~*story': 'http://127.0.0.1:1337',
-        '/slash': 'http://127.0.0.1:1337/'
+        '/slash': 'http://127.0.0.1:1337/',
+        '/transform': 'http://127.0.0.1:1337'
       },
-      keepQueryString: false
+      keepQueryString: false,
+      transformResponse: function() {
+        if (this.path === '/transform') {
+          this.type = 'text';
+          this.body = 'transformed plain text'
+        }
+      }
     }));
 
     app.use(function *() {
@@ -111,11 +118,24 @@ describe('koa proxy', function () {
       .end(done);
   });
 
-
   it('should resolve slash style', function (done) {
     request
       .get('/slash')
       .expect('hello root!')
+      .end(done);
+  });
+
+  it('should apply transform function to modify final response', function (done) {
+    supertest('http://127.0.0.1:1337')
+      .get('/transform')
+      .expect('content-type', 'application/json; charset=utf-8')
+      .expect({
+        "title": "love is color blind",
+        "content": "transform should resolve the content"
+      });
+    request
+      .get('/transform')
+      .expect('transformed plain text')
       .end(done);
   });
 
