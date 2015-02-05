@@ -118,13 +118,27 @@ utils.resolveMultipart = function(req, opts) {
  * @returns {Object} - normal object
  */
 utils.objectNormalize = function(multipart) {
-
   if (!multipart || Object !== multipart.constructor) return multipart;
   var keys = Object.keys(multipart);
   for (var i = 0; i < keys.length; i++) {
     multipart[keys[i]] = multipart[keys[i]].toString();
   }
   return multipart;
+};
+
+/**
+ * shallow merge two normal object
+ * @param {object} destiny - the final object to override with source
+ * @param {object} source - the origin object wait to merge
+ * @returns {Object} - final merged object
+ */
+utils.merge = function(destiny, source) {
+  for (var key in source) {
+    if (source.hasOwnProperty(key)) {
+      destiny[key] = source[key];
+    }
+  }
+  return destiny;
 };
 
 module.exports = utils;
