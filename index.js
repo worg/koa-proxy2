@@ -1,7 +1,7 @@
 /**
  * A module proxy requests with nginx style
  * @module koa-proxy
- * @version v0.6.5
+ * @version v0.6.6
  */
 
 /**
