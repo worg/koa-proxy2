@@ -57,9 +57,7 @@ var koaProxy = function(options) {
       var response = yield request(opts);
 
       // respond client
-      if (typeof response[0].body === 'string' && response[0].body.indexOf('Cannot GET ') !== -1) {
-        return this.status = response[0].statusCode;
-      }
+      this.status = response[0].statusCode;
       this.set(response[0].headers);
       this.body = response[0].body;
       if (typeof options.transformResponse === 'function') options.transformResponse.apply(this);
