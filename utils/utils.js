@@ -1,15 +1,23 @@
 /**
- * Export several useful method
- * @module utils
+ * @external formidable
+ * @see https://www.npmjs.com/package/formidable
  */
 
-/**
- * Module dependencies
+/*
+ * module dependency
  */
-
 var assert = require('assert');
 var formidable = require('formidable');
 var fs = require('fs');
+
+/**
+ * Export several useful method
+ * @exports utils
+ * @author bornkiller <hjj491229492@hotmail.com>
+ * @version v0.6.6
+ * @license MIT
+ * @copyright bornkiller NPM package 2014
+ */
 var utils = {};
 
 /**

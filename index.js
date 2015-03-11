@@ -2,9 +2,10 @@
  * A module proxy requests with nginx style
  * @module koa-proxy
  * @version v0.6.6
+ * @requires utils
  */
 
-/**
+/*
  * Module dependencies
  */
 var assert =require('assert');
