@@ -50,13 +50,13 @@ utils.resolvePath = function(path, map) {
 
   pathRegExp = regExp.filter(function(value) { return value.test(path);});
   if (pathRegExp.length !== 0) {
-    url = map['~' + pathRegExp[0].toString().replace(new RegExp('^\\/\\\\'), '').replace(new RegExp('\\/$'), '')];
+    url = map['~' + pathRegExp[0].toString().replace(new RegExp('^\\/\\\\'), '').replace(new RegExp('\\/$'), '')] || map['~' + pathRegExp[0].toString().replace(new RegExp('^\/'), '').replace(new RegExp('\/$'), '')];
     return url.replace(new RegExp('https?:\/\/'), '').indexOf('/') === -1 ? url + path : url;
   }
 
   pathRegExp = insRegExp.filter(function(value) { return value.test(path);});
   if (pathRegExp.length !== 0) {
-    url = map['~*' + pathRegExp[0].toString().replace(new RegExp('^\\/\\\\'), '').replace(new RegExp('\\/i$'), '')];
+    url = map['~*' + pathRegExp[0].toString().replace(new RegExp('^\\/\\\\'), '').replace(new RegExp('\\/i$'), '')] || map['~*' + pathRegExp[0].toString().replace(new RegExp('^\/'), '').replace(new RegExp('\/i$'), '')];
     return url.replace(new RegExp('https?:\/\/'), '').indexOf('/') === -1 ? url + path : url;
   }
 
