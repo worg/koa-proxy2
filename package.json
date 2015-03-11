@@ -1,6 +1,6 @@
 {
   "name": "koa-proxy2",
-  "version": "0.6.6",
+  "version": "0.7.0",
   "description": "Make it convenience for mock nginx trick when use angular.",
   "main": "index.js",
   "repository": {
@@ -32,8 +32,8 @@
     "supertest": "^0.15.0"
   },
   "scripts": {
-    "test": "mocha --harmony-generators --reporter spec",
-    "test-visual": "node --harmony-generators ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report html",
-    "test-travis": "node --harmony-generators ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report lcovonly"
+    "test": "mocha --harmony --reporter spec",
+    "test-visual": "node --harmony ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report html",
+    "test-travis": "node --harmony ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report lcovonly"
   }
 }

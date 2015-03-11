@@ -77,6 +77,8 @@ app.listen(1336);
 ```
 
 ## Change Log
++ 2015/02/11 v0.7.0
+Fix fatal proxy bug, add `text/plain` body support, update all module dependency.
 + 2015/02/06 v0.6.5
 Add `transformResponse` options for response transform.
 + 2015/02/02 v0.6.0
