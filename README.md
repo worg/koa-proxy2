@@ -21,8 +21,8 @@ Till now, options below provided for proxy-pass:
   map: {
     '/proxy': 'http://127.0.0.1',
 	'=/nodejs': 'http://127.0.0.1',
-	'~^story': 'http://127.0.0.1',
-	'~*story': 'http://127.0.0.1',
+	'~^/story': 'http://127.0.0.1',
+	'~*/story': 'http://127.0.0.1',
 	'/slash': 'http://127.0.0.1/'
   },
   keepQueryString: false,
