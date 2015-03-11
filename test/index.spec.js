@@ -156,14 +156,25 @@ describe('koa proxy content', function () {
   it('should resolve json body', function (done) {
     request
       .post('/')
+      .type('json')
       .send({"title": "story"})
       .expect({"title":"story"})
+      .end(done);
+  });
+
+  it('should resolve json body', function (done) {
+    request
+      .post('/')
+      .type('text')
+      .send('love is color blind')
+      .expect('love is color blind')
       .end(done);
   });
 
   it('should resolve form body', function (done) {
     request
       .post('/')
+      .type('form')
       .send('title=story&category=education')
       .expect({"title":"story", "category":"education"})
       .end(done);

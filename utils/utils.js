@@ -37,7 +37,6 @@ utils.resolvePath = function(path, map) {
     , pathRegExp;
 
   var keys = Object.keys(map);
-  //console.log(keys);
   for (var i = 0; i < keys.length; i++) {
     if (keys[i].indexOf('=') !== 0 && keys[i].indexOf('~') !== 0 && keys[i].indexOf('~*') !== 0) normal.push(keys[i]);
     if (keys[i].indexOf('=') === 0) normal.push(keys[i].slice(1));
@@ -71,7 +70,7 @@ utils.resolvePath = function(path, map) {
  */
 utils.resolveBody = function(request) {
   request = request.request || request;
-  if (request.is('application/x-www-form-urlencoded')) return utils.serialize(request.body);
+  if (request.is('form')) return utils.serialize(request.body);
   if (request.is('json')) return request.body;
   return null;
 };

@@ -46,7 +46,7 @@ var koaProxy = function(options) {
     // skip body parse when parsed
     if (!this.request.body && this.method !== 'get' && this.method !== 'delete') {
       // parse body when raw-body
-      if (this.is('json', 'urlencoded')) this.request.body = yield parse(this);
+      if (this.is('json', 'text', 'urlencoded')) this.request.body = yield parse(this);
       if (this.is('multipart')) {
         bodyEnabled = false;
         this.request.body = yield utils.resolveMultipart(this, options.formidable || {});
