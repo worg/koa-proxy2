@@ -12,7 +12,9 @@ describe('utils path resolve function', function () {
       '=/nodejs': 'http://localhost',
       '~/story': 'http://localhost',
       '~*/article': 'http://localhost',
-      '/swift': 'http://localhost/'
+      '/swift': 'http://localhost/',
+      '~/v1/user': 'http://localhost',
+      '~*/v1/service/account': 'http://localhost'
     };
   });
 
@@ -34,12 +36,21 @@ describe('utils path resolve function', function () {
     result2.should.be.false;
   });
 
-  it('should resolve tilde style', function () {
+  it('should resolve simple tilde style', function () {
     var path1 = '/story-is-colorful';
     var path2 = '/Story-is-colorful';
     var result1 = utils.resolvePath(path1, map);
     var result2 = utils.resolvePath(path2, map);
     result1.should.equal('http://localhost/story-is-colorful');
+    result2.should.be.false;
+  });
+
+  it('should resolve cascade tilde style', function () {
+    var path1 = '/v1/user/list/';
+    var path2 = '/V1/user/list/';
+    var result1 = utils.resolvePath(path1, map);
+    var result2 = utils.resolvePath(path2, map);
+    result1.should.equal('http://localhost/v1/user/list/');
     result2.should.be.false;
   });
 
@@ -50,6 +61,15 @@ describe('utils path resolve function', function () {
     var result2 = utils.resolvePath(path2, map);
     result1.should.equal('http://localhost/article-is-colorful');
     result2.should.equal('http://localhost/ARTICLE-is-colorful');
+  });
+
+  it('should resolve tilde asterisk cascade style', function () {
+    var path1 = '/v1/service/account';
+    var path2 = '/V1/service/account';
+    var result1 = utils.resolvePath(path1, map);
+    var result2 = utils.resolvePath(path2, map);
+    result1.should.equal('http://localhost/v1/service/account');
+    result2.should.equal('http://localhost/V1/service/account');
   });
 
   it('should resolve given slash style', function () {
