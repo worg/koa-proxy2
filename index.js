@@ -32,7 +32,7 @@ var utils = require('./utils/utils.js');
 /**
  * A module proxy requests with nginx style
  * @exports koa-proxy
- * @version v0.7.1
+ * @version v0.7.2
  * @requires utils
  * @param {ProxyOption} options - proxy options and formidable options
  * @returns {Function} - generator function act koa middleware

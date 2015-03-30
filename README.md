@@ -77,7 +77,7 @@ app.listen(1336);
 ```
 
 ## Change Log
-+ 2015/02/11 v0.7.1
++ 2015/03/30 v0.7.2
 Fix fatal nodejs and iojs compatibility bug.
 + 2015/02/11 v0.7.0
 Fix fatal proxy bug, add `text/plain` body support, update all module dependency.
