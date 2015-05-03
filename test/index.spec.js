@@ -5,7 +5,7 @@ var should = require('should');
 var supertest = require('supertest');
 var koaProxy = require('../index.js');
 var utils = require('../utils/utils.js');
-var backServer = require('./mock/backServer.js');
+var server = require('./mock/server');
 
 describe('koa proxy options', function () {
   var app;
@@ -31,7 +31,7 @@ describe('koa proxy requests', function () {
   var target, app, request;
 
   before(function () {
-   target = backServer.listen(1337);
+   target = server.listen(1337);
   });
 
   before(function() {
@@ -96,7 +96,7 @@ describe('koa proxy with query string', function () {
   var target, app;
 
   before(function () {
-    target = backServer.listen(1337);
+    target = server.listen(1337);
   });
 
   it('should reserve query string with url when enabled', function (done) {
@@ -208,7 +208,7 @@ describe('koa proxy 404 error', function () {
   var target, app, request;
 
   before(function () {
-    target = backServer.listen(1337);
+    target = server.listen(1337);
   });
 
   before(function() {
