@@ -6,10 +6,10 @@ koa-proxy2
 ![Package Dependency](https://david-dm.org/bornkiller/koa-proxy2.svg?style=flat)
 ![Package DevDependency](https://david-dm.org/bornkiller/koa-proxy2/dev-status.svg?style=flat)
 
-Make it convenience for mock nginx trick when use angular. I'm working on new version, which provide more nginx directive, rather than just backword network proxy.
+Make it convenience for mock nginx trick when use angular, make backward proxy easier.
 
 ## Inspiration
-use angular and nginx to develop web project, it make me feel helpless when communicate with real backend API through nginx, while I only mock static server, proxy server not included. To avoid directly modify the code in the nginx server, maybe mock proxy with nodejs become necessary. 
+use angular and nginx to develop web project, it make me feel helpless when communicate with real backend API through nginx, while I only mock static server, proxy server not included. To avoid directly modify the code in the nginx server root, and intercept specific URL for data mock, the scalable proxy module with nodejs become necessary. 
 
 ## Usage
 With time passing by, `koa-proxy2` integrate with body parser, therefore you don't have to use body parse middleware, like `koa-body` or something else, while never cause problem if you used for some reason. It support `json`, `urlencoded`, `multipart/form-data` proxy work well.
