@@ -22,9 +22,9 @@ var formidable = require('formidable');
 var utils = {};
 
 /**
- * Judge map rules match, return final URL when match, false when mismatch
- * @param path
- * @param map
+ * @description Judge map rules match, return final URL when match, false when mismatch
+ * @param {string} path - the http request path
+ * @param {object.<string, string>} map - the map relation between origin request path and real backend API
  * @returns {boolean|string}
  */
 utils.resolvePath = function(path, map) {
