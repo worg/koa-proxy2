@@ -31,13 +31,13 @@ var utils = require('./utils/utils.js');
 
 /**
  * A module proxy requests with nginx style
- * @exports koa-proxy
+ * @module koa-proxy
  * @version v0.7.2
  * @requires utils
  * @param {ProxyOption} options - proxy options and formidable options
  * @returns {Function} - generator function act koa middleware
  */
-var koaProxy = function(options) {
+module.exports = function(options) {
   assert.ok(options && Object === options.constructor, 'Options Object Required');
 
   return function* (next) {
@@ -85,5 +85,3 @@ var koaProxy = function(options) {
     yield next;
   };
 };
-
-module.exports = koaProxy;
