@@ -35,6 +35,7 @@ var utils = require('./utils/utils.js');
  * @version v0.7.2
  * @requires utils
  * @param {ProxyOption} options - proxy options and formidable options
+ * @throws {} the options must provide
  * @returns {Function} - generator function act koa middleware
  */
 module.exports = function(options) {

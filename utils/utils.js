@@ -12,7 +12,7 @@ var formidable = require('formidable');
 
 /**
  * Export several useful method
- * @exports utils
+ * @exports utils/utils
  * @requires formidable
  * @author bornkiller <hjj491229492@hotmail.com>
  * @version v0.6.6
