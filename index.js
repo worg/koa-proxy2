@@ -21,68 +21,69 @@ var request = thunkify(require('request'));
 var utils = require('./utils/utils.js');
 
 /**
- * @typedef {Object} ProxyOption
- * @property {!Object} map - define the proxy rules with normal string, `=` prefix for complete match, `~` prefix for
- * regexp match case sensitive, `~*` prefix just almost the same as `~`, except case insensitive
- * @property {!Boolean} keepQueryString - whether preserve the query string for final request URL
- * @property {Function} [transformResponse] - post resolve the response
- * @property {Object} [formidable] - options for formidable module configure
+ * @typedef {!Object} ProxyOption
+ * @property {RegExp} proxy_location - URL match for specific path request proxy
+ * @property {string} proxy_pass - backend proxy target
  */
 
 /**
  * A module proxy requests with nginx style
- * @module koa-proxy
+ * @module koa-proxy2
  * @version v0.7.2
  * @requires utils
- * @param {ProxyOption} options - proxy options and formidable options
- * @throws {} the options must provide
+ * @param {Array.<ProxyOption>} rules - proxy rule definition
+ * @param {Object} options - proxy config definition
+ * @throws {Error} the rules must provide array, even empty
  * @returns {Function} - generator function act koa middleware
  */
-module.exports = function(options) {
-  assert.ok(options && Object === options.constructor, 'Options Object Required');
+module.exports = function(rules, options) {
+  assert.ok(util.isArray(rules), 'Array Rules Required');
+
+  options = _.defaults(options, {
+    body_parse: true,
+    keep_query_string: true,
+    proxy_timeout: 3000,
+    proxy_methods: ['get', 'post', 'put', 'delete']
+  });
 
   return function* (next) {
-    var bodyEnabled = true;
+    // transfer request next when rules, methods mismatch
+    if (!utils.resolvePath(this.path, rules) || options.proxy_methods.indexOf(this.method) === -1) return yield next;
 
-    // skip body parse when parsed
-    if (!this.request.body && this.method !== 'get' && this.method !== 'delete') {
+    var multipart = false;
+
+    // skip body parse when parsed or disabled
+    if (!this.request.body && options.body_parse) {
       // parse body when raw-body
       if (this.is('json', 'text', 'urlencoded')) this.request.body = yield parse(this);
       if (this.is('multipart')) {
-        bodyEnabled = false;
-        this.request.body = yield utils.resolveMultipart(this, options.formidable || {});
+        multipart = true;
+        this.request.body = yield utils.resolveMultipart(this);
       }
     }
 
     // respond error when occur in body parse
     if (util.isError(this.request.body)) return this.status = 500;
 
-    // proxy request when map rules match
-    if (utils.resolvePath(this.path, options.map)) {
-      // resolve available opts for request module
-      var opts = {
-        method: this.method,
-        url: utils.resolvePath(this.path, options.map),
-        headers: this.header
-      };
+    // resolve available opts for request module
+    var opts = {
+      method: this.method,
+      url: utils.resolvePath(this.path, rules),
+      headers: this.header
+    };
 
-      opts.body = bodyEnabled ? utils.resolveBody(this) : null;
-      opts.formData = !bodyEnabled ? this.request.body : null;
-      opts.json = this.is('json') === 'json';
-      opts.qs = !!options.keepQueryString ? this.query : {};
+    opts.body = !multipart ? this.request.body : null;
+    opts.form = this.is('urlencoded') ? this.request.body : null;
+    opts.formData = multipart ? this.request.body : null;
+    opts.json = this.is('json') === 'json';
+    opts.qs = !!options.keepQueryString ? this.query : {};
 
+    // comply the proxy
+    var response = yield request(opts);
 
-      // comply the proxy
-      var response = yield request(opts);
-
-      // respond client
-      this.status = response[0].statusCode;
-      this.set(response[0].headers);
-      this.body = response[0].body;
-      if (typeof options.transformResponse === 'function') options.transformResponse.apply(this);
-      return null;
-    }
-
-    yield next;
+    // respond client
+    this.status = response[0].statusCode;
+    this.set(response[0].headers);
+    this.body = response[0].body;
   };
 };
