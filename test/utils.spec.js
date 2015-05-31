@@ -1,125 +1,75 @@
-var path = require('path');
+"use strict";
+
 var fs = require('fs');
+var path = require('path');
+var http = require('http');
+var koa = require('koa');
+var request = require('superagent');
 var should = require('should');
 var utils = require('../utils/utils.js');
 
 describe('utils path resolve function', function () {
-  var map;
+  var rules = [
+    {
+      proxy_location: '/v1/version/',
+      proxy_pass: 'http://192.168.100.40'
+    },
+    {
+      proxy_location: /^\/hunter/,
+      proxy_pass: 'http://192.168.100.40'
+    },
+    {
+      proxy_location: /user\/$/,
+      proxy_pass: 'http://www.reverseflower.com/list/'
+    }
+  ];
 
-  before(function () {
-    map = {
-      '/love': 'http://localhost',
-      '=/nodejs': 'http://localhost',
-      '~/story': 'http://localhost',
-      '~*/article': 'http://localhost',
-      '/swift': 'http://localhost/',
-      '~/v1/user': 'http://localhost',
-      '~*/v1/service/account': 'http://localhost'
-    };
+  it('should support exact math', function () {
+    utils.resolvePath('/v1/version/', rules).should.equal('http://192.168.100.40/v1/version/');
   });
 
-  it('should resolve normal style', function () {
-    var path1 = '/love';
-    var path2 = '/loves';
-    var result1 = utils.resolvePath(path1, map);
-    var result2 = utils.resolvePath(path2, map);
-    result1.should.equal('http://localhost/love');
-    result2.should.be.false;
+  it('should support regular expression math', function () {
+    utils.resolvePath('/hunter/animals/', rules).should.equal('http://192.168.100.40/hunter/animals/');
   });
 
-  it('should resolve equal sign style', function () {
-    var path1 = '/nodejs';
-    var path2 = '/nodejs/';
-    var result1 = utils.resolvePath(path1, map);
-    var result2 = utils.resolvePath(path2, map);
-    result1.should.equal('http://localhost/nodejs');
-    result2.should.be.false;
+  it('should support proxy_pass with URL', function () {
+    utils.resolvePath('/list/user/', rules).should.equal('http://www.reverseflower.com/list/')
   });
 
-  it('should resolve simple tilde style', function () {
-    var path1 = '/story-is-colorful';
-    var path2 = '/Story-is-colorful';
-    var result1 = utils.resolvePath(path1, map);
-    var result2 = utils.resolvePath(path2, map);
-    result1.should.equal('http://localhost/story-is-colorful');
-    result2.should.be.false;
-  });
-
-  it('should resolve cascade tilde style', function () {
-    var path1 = '/v1/user/list/';
-    var path2 = '/V1/user/list/';
-    var result1 = utils.resolvePath(path1, map);
-    var result2 = utils.resolvePath(path2, map);
-    result1.should.equal('http://localhost/v1/user/list/');
-    result2.should.be.false;
-  });
-
-  it('should resolve tilde asterisk style', function () {
-    var path1 = '/article-is-colorful';
-    var path2 = '/ARTICLE-is-colorful';
-    var result1 = utils.resolvePath(path1, map);
-    var result2 = utils.resolvePath(path2, map);
-    result1.should.equal('http://localhost/article-is-colorful');
-    result2.should.equal('http://localhost/ARTICLE-is-colorful');
-  });
-
-  it('should resolve tilde asterisk cascade style', function () {
-    var path1 = '/v1/service/account';
-    var path2 = '/V1/service/account';
-    var result1 = utils.resolvePath(path1, map);
-    var result2 = utils.resolvePath(path2, map);
-    result1.should.equal('http://localhost/v1/service/account');
-    result2.should.equal('http://localhost/V1/service/account');
-  });
-
-  it('should resolve given slash style', function () {
-    var path1 = '/swift';
-    var result1 = utils.resolvePath(path1, map);
-    result1.should.equal('http://localhost/');
-  });
-
-  after(function () {
-    map = null;
+  it('should prompt false when mismatch', function () {
+    utils.resolvePath('/hello/world/', rules).should.be.false;
   });
 });
 
-describe('utils methods', function () {
-  it('serialize method should resolve object', function () {
-    var origin = {
-      "title": "story",
-      "category": "education"
-    };
-    var result = utils.serialize(origin);
-    result.should.equal('title=story&category=education');
-  });
+describe.only('utils multipart resolve function', function () {
+  var app, server;
 
-  it('serialize method should never resolve non-object', function() {
-    var compare = ["hello"];
-    var result = utils.serialize(compare);
-    result.should.equal('');
-  });
+  beforeEach(function () {
+    app = koa();
 
-  it('objectNormalize method should transform multipart object', function () {
-    var content = {
-      title: 'kiss you',
-      love: fs.readFileSync(path.join(__dirname, 'mock/love.txt'))
-    };
-    var result = utils.objectNormalize(content);
-    result.should.have.properties({
-      title: 'kiss you',
-      love: 'I love you forever!'
+    app.use(function *() {
+      this.body = yield utils.resolveMultipart(this);
+      this.body.youth = this.body.youth.toString();
     });
+
+    server = http.createServer(app.callback()).listen(5000);
   });
 
-  it('objectNormalize method should handle other variables', function () {
-    utils.objectNormalize('').should.equal('');
+  it('should parse multipart body correctly', function (done) {
+    request
+      .post('http://localhost:5000')
+      .field('title', 'koa-proxy')
+      .field('content', 'kiss you')
+      .attach('youth', fs.createReadStream(path.join(__dirname, 'mock/youth.txt')))
+      .end(function(err, res) {
+        res.body.should.have.property('title', 'koa-proxy');
+        res.body.should.have.property('content', 'kiss you');
+        res.body.should.have.property('youth', 'youth is not a time of life!');
+        done();
+      })
   });
 
-  it('merge method should merge two object', function () {
-    var destiny = { "title" : "love is color blind", "content": "never give up" };
-    var source = { "title" : "we are the champion", "footer" : "2015-02-06" };
-    var result = utils.merge(destiny, source);
-    result.should.have.property("title", "we are the champion");
-    result.should.have.property("footer", "2015-02-06");
+  afterEach(function () {
+    server.close();
   });
 });
