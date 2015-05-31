@@ -21,16 +21,16 @@
   "dependencies": {
     "co-body": "^2.0.0",
     "formidable": "^1.0.17",
-    "request": "^2.55.0",
+    "request": "^2.56.0",
     "thunkify": "^2.1.2"
   },
   "devDependencies": {
-    "express": "^4.12.3",
+    "express": "^4.12.4",
     "istanbul-harmony": "^0.3.12",
     "koa": "^0.21.0",
-    "mocha": "^2.2.4",
-    "should": "^6.0.1",
-    "supertest": "^0.15.0"
+    "mocha": "^2.2.5",
+    "should": "^6.0.3",
+    "supertest": "^1.0.1"
   },
   "scripts": {
     "test": "mocha --harmony --reporter spec",
