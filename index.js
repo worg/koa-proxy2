@@ -46,33 +46,31 @@ module.exports = function(rules, options) {
     // transfer request next when rules, methods mismatch
     if (!utils.resolvePath(this.path, rules) || options.proxy_methods.indexOf(this.method) === -1) return yield next;
 
-    var multipart = false;
+    if (this.method !== 'POST' && this.method !== 'PUT') options.body_parse = false;
 
     // skip body parse when parsed or disabled
     if (!this.request.body && options.body_parse) {
       // parse body when raw-body
       if (this.is('json', 'text', 'urlencoded')) this.request.body = yield parse(this);
-      if (this.is('multipart')) {
-        multipart = true;
-        this.request.body = yield utils.resolveMultipart(this);
-      }
+      if (this.is('multipart')) this.request.body = yield utils.resolveMultipart(this);
+      // respond error when occur in body parse
+      if (util.isError(this.request.body)) return this.status = 500;
     }
-
-    // respond error when occur in body parse
-    if (util.isError(this.request.body)) return this.status = 500;
 
     // resolve available opts for request module
     var opts = {
       method: this.method,
       url: utils.resolvePath(this.path, rules),
-      headers: this.header
+      headers: this.header,
+      qs: !!options.keep_query_string ? this.query : {}
     };
 
-    opts.form = this.is('urlencoded') ? this.request.body : null;
-    opts.formData = multipart ? this.request.body : null;
-    if (!opts.form && !opts.formData) opts.body = this.request.body;
-    opts.json = this.is('json') === 'json';
-    opts.qs = !!options.keep_query_string ? this.query : {};
+    if (this.request.body && Object.keys(this.request.body).length !== 0) {
+      opts.form = this.is('urlencoded') ? this.request.body : null;
+      opts.formData = this.is('multipart') ? this.request.body : null;
+      opts.json = this.is('json') === 'json';
+      if (!this.is('urlencoded') && !this.is('multipart')) opts.body = this.request.body;
+    }
 
     // comply the proxy
     var response = yield request(opts);
