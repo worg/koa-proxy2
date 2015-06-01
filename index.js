@@ -18,6 +18,7 @@ var util =require('util');
 var parse = require('co-body');
 var thunkify = require('thunkify');
 var request = thunkify(require('request'));
+var _ = require('underscore');
 var utils = require('./utils/utils.js');
 
 /**
@@ -39,11 +40,11 @@ var utils = require('./utils/utils.js');
 module.exports = function(rules, options) {
   assert.ok(util.isArray(rules), 'Array Rules Required');
 
-  options = _.defaults(options, {
+  options = _.defaults(options || {}, {
     body_parse: true,
     keep_query_string: true,
     proxy_timeout: 3000,
-    proxy_methods: ['get', 'post', 'put', 'delete']
+    proxy_methods: ['GET', 'POST', 'PUT', 'DELETE']
   });
 
   return function* (next) {

@@ -41,7 +41,7 @@ describe('utils path resolve function', function () {
   });
 });
 
-describe.only('utils multipart resolve function', function () {
+describe('utils multipart resolve function', function () {
   var app, server;
 
   beforeEach(function () {
