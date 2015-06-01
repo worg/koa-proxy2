@@ -22,7 +22,8 @@ describe('server for proxy', function () {
 
   it('should response the specific URL with query string', function (done) {
     request
-      .get('http://localhost:5001/proxy/?title=webstorm&content=jetbrain')
+      .get('http://localhost:5001/proxy/')
+      .query('title=webstorm&content=jetbrain')
       .end(function(err, res) {
         res.body.should.have.property('title', 'webstorm');
         res.body.should.have.property('content', 'jetbrain');

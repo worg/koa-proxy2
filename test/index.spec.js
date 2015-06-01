@@ -30,25 +30,6 @@ describe('proxy server', function () {
       })
   });
 
-  it('should execute the proxy when rules match', function (done) {
-    app = koa();
-    app.use(proxy([{
-        proxy_location: '/version/',
-        proxy_pass: 'http://localhost:5000/proxy/'
-      }]
-    ));
-
-    proxy_server = http.createServer(app.callback()).listen(5001);
-
-    request
-      .get('http://localhost:5001/version/')
-      .end(function(err, res) {
-        res.body.should.have.property('title', 'love is color blind!');
-        res.body.should.have.property('content', 'youth is not a time of life!');
-        done();
-      })
-  });
-
   it('should transfer the request next when rules match, methods not match', function (done) {
     app = koa();
     app.use(proxy([{
@@ -72,6 +53,47 @@ describe('proxy server', function () {
       })
   });
 
+  it('should execute the proxy when rules match with query string', function (done) {
+    app = koa();
+    app.use(proxy([{
+        proxy_location: '/version/',
+        proxy_pass: 'http://localhost:5000/proxy/'
+      }]
+    ));
+
+    proxy_server = http.createServer(app.callback()).listen(5001);
+
+    request
+      .get('http://localhost:5001/version/')
+      .query('title=webstorm&content=jetbrain')
+      .end(function(err, res) {
+        res.body.should.have.property('title', 'webstorm');
+        res.body.should.have.property('content', 'jetbrain');
+        done();
+      })
+  });
+
+  it('should execute the proxy when rules match without query string', function (done) {
+    app = koa();
+    app.use(proxy([{
+        proxy_location: '/version/',
+        proxy_pass: 'http://localhost:5000/proxy/'
+      }], {
+        keep_query_string: false
+      }
+    ));
+
+    proxy_server = http.createServer(app.callback()).listen(5001);
+
+    request
+      .get('http://localhost:5001/version/')
+      .query('title=webstorm&content=jetbrain')
+      .end(function(err, res) {
+        res.body.should.have.property('title', 'love is color blind!');
+        res.body.should.have.property('content', 'youth is not a time of life!');
+        done();
+      })
+  });
 
   afterEach(function () {
     proxy_server.close();

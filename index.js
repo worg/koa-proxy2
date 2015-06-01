@@ -68,9 +68,9 @@ module.exports = function(rules, options) {
       headers: this.header
     };
 
-    if (multipart) opts.body = this.request.body;
     opts.form = this.is('urlencoded') ? this.request.body : null;
     opts.formData = multipart ? this.request.body : null;
+    if (!opts.form && !opts.formData) opts.body = this.request.body;
     opts.json = this.is('json') === 'json';
     opts.qs = !!options.keep_query_string ? this.query : {};
 
