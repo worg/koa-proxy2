@@ -20,7 +20,7 @@ var _ = require('underscore');
  * @requires formidable
  * @requires _
  * @author bornkiller <hjj491229492@hotmail.com>
- * @version v0.6.6
+ * @version v0.9.0
  * @license MIT
  * @copyright bornkiller NPM package 2014
  */
