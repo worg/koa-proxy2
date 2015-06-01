@@ -68,11 +68,11 @@ module.exports = function(rules, options) {
       headers: this.header
     };
 
-    opts.body = !multipart ? this.request.body : null;
+    if (multipart) opts.body = this.request.body;
     opts.form = this.is('urlencoded') ? this.request.body : null;
     opts.formData = multipart ? this.request.body : null;
     opts.json = this.is('json') === 'json';
-    opts.qs = !!options.keepQueryString ? this.query : {};
+    opts.qs = !!options.keep_query_string ? this.query : {};
 
     // comply the proxy
     var response = yield request(opts);
