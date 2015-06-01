@@ -6,11 +6,11 @@ var app = require('./mock/server.js');
 describe('server for proxy', function () {
   var server;
 
-  beforeEach(function () {
+  before(function () {
    server = http.createServer(app).listen(5001);
   });
 
-  it('should response the specific URL', function (done) {
+  it('should response the specific URL without query string', function (done) {
     request
       .get('http://localhost:5001/proxy/')
       .end(function(err, res) {
@@ -20,7 +20,17 @@ describe('server for proxy', function () {
       })
   });
 
-  afterEach(function () {
+  it('should response the specific URL with query string', function (done) {
+    request
+      .get('http://localhost:5001/proxy/?title=webstorm&content=jetbrain')
+      .end(function(err, res) {
+        res.body.should.have.property('title', 'webstorm');
+        res.body.should.have.property('content', 'jetbrain');
+        done();
+      })
+  });
+
+  after(function () {
     server.close();
   });
 });
