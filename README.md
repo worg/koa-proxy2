@@ -6,7 +6,8 @@ koa-proxy2
 ![Package Dependency](https://david-dm.org/bornkiller/koa-proxy2.svg?style=flat)
 ![Package DevDependency](https://david-dm.org/bornkiller/koa-proxy2/dev-status.svg?style=flat)
 
-Make it convenience for mock nginx trick when use angular, make backward proxy easier.
+Make it convenience for mock nginx trick when use angular, make backward proxy easier. And please pay attention, the
+repo just for make development server when debug.
 
 ## Inspiration
 use angular and nginx to develop web project, it make me feel helpless when communicate with real backend API through nginx, while I only mock static server, proxy server not included. To avoid directly modify the code in the nginx server root, and intercept specific URL for data mock, the scalable proxy module with nodejs become necessary. 
@@ -14,43 +15,37 @@ use angular and nginx to develop web project, it make me feel helpless when comm
 ## Usage
 With time passing by, `koa-proxy2` integrate with body parser, therefore you don't have to use body parse middleware, like `koa-body` or something else, while never cause problem if you used for some reason. It support `json`, `urlencoded`, `multipart/form-data` proxy work well.
 
-Till now, options below provided for proxy-pass:
+I separate the `proxy rules` and `module configuration`.
+
+The `proxy rule` act like followings:
 
 ```javascript
 {
-  map: {
-    '/proxy': 'http://127.0.0.1',
-	'=/nodejs': 'http://127.0.0.1',
-	'~^/story': 'http://127.0.0.1',
-	'~*/story': 'http://127.0.0.1',
-	'/slash': 'http://127.0.0.1/'
-  },
-  keepQueryString: false,
-  transformResponse: function() {
-    if (this.path === '/transform') {
-      this.type = 'text';
-      this.body = 'transformed plain text'
-    }
-  }
+  // URL match rule for specific path request proxy
+  proxy_location: '/v1/version',
+  // target backend, different between with URL or not
+  proxy_pass: 'http://api.google.com'
 }
 ```
 
-`map` the proxy rules, just like nginx style.
+`proxy_location` could be string or regular expression, when the original path match the string or regular expression, the proxy actived, otherwise, will just transfer the request next.
 
-For above example:
+`proxy_pass` has different behaviour just like nginx. The above example, request `/v1/version` will resolved into `http://api.google.com/v1/version`, while when proxy_pass equals `http://api.google.com/` or with specific path, the original request path will omit.
 
-`/proxy` is the same as `=/proxy`, `~` is regular expression match case sensitive, `~*` is almost the same as `~`, except case insensitive. when path map domain address, the final target URL will keep the request path, otherwise will
-ignore the path.
+the `module configuration` act like belows:
 
-request to `/proxy` will resolve to request to `http://127.0.0.1/proxy`; request to `/slash` will resolve to request to `http://127.0.0.1/`, rather than http://127.0.0.1/slash`.
-
-`keepQueryString` to judge if reserve the query string after path.
-
-`transformResponse` to transform the response when send back the client, inside the function, `this` point to `koa` context, so you can modify the response as  you think.
-
-
-`formidable` module is used for `multipart/form-data` body parse, you can pass in `formidable` options with 
-the proxy-pass options, see [https://github.com/felixge/node-formidable](https://github.com/felixge/node-formidable)
+```javascript	
+{
+  // whether parse the body
+  body_parse: true,
+  // reserve the query string after path.
+  keep_query_string: true,
+  // HTTP request timeout milliseconds
+  proxy_timeout: 3000,
+  // which method should proxy
+  proxy_methods: ['GET', 'POST', 'PUT', 'DELETE']
+}
+```
 
 ## Practice
 Assume all real backend api follow the pattern `/v1/*`, all static files are in `./static`, you will need:
@@ -62,12 +57,13 @@ var serve = require('koa-static');
 var proxy = require('koa-proxy2');
 var app = koa();
 
-app.use(proxy({
-  map: {
-    '~/v1': 'http://127.0.0.1'
-  },
-  keepQueryString: true
-}));
+app.use(proxy([{
+    // URL match rule for specific path request proxy
+    proxy_location: /^\/v1/.*/,
+    // target backend, different between with URL or not
+    proxy_pass: 'http://api.google.com'
+  }], { proxy_timeout: 50000 }
+));
 app.use(serve(path.join(__dirname, 'static')));
 app.use(function *() {
     this.type = 'html';
@@ -77,6 +73,8 @@ app.listen(1336);
 ```
 
 ## Change Log
++ 2015/06/01 v0.9.0
+Modify a more nginx style way, and maybe has several nodejs and iojs compatibility bug.
 + 2015/03/30 v0.7.2
 Fix fatal nodejs and iojs compatibility bug.
 + 2015/02/11 v0.7.0

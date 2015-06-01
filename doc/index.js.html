@@ -26,92 +26,89 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * @external co-body
- * @see https://www.npmjs.com/package/co-body
- */
-
-/**
- * @external thunkify
- * @see https://www.npmjs.com/package/thunkify
- */
-
-/**
- * @external request
- * @see https://www.npmjs.com/package/request
- */
+            <pre class="prettyprint source linenums"><code>"use strict";
 
 var assert =require('assert');
 var util =require('util');
 var parse = require('co-body');
 var thunkify = require('thunkify');
 var request = thunkify(require('request'));
+var _ = require('underscore');
 var utils = require('./utils/utils.js');
 
 /**
- * @typedef {Object} ProxyOption
- * @property {!Object} map - define the proxy rules with normal string, `=` prefix for complete match, `~` prefix for
- * regexp match case sensitive, `~*` prefix just almost the same as `~`, except case insensitive
- * @property {!Boolean} keepQueryString - whether preserve the query string for final request URL
- * @property {Function} [transformResponse] - post resolve the response
- * @property {Object} [formidable] - options for formidable module configure
+ * @typedef {!Object} ProxyOption
+ * @property {(string|RegExp)} proxy_location - URL match rule for specific path request proxy
+ * @property {string} proxy_pass - target backend, different between with URL or not
  */
 
 /**
  * A module proxy requests with nginx style
- * @module koa-proxy
- * @version v0.7.2
+ * @version v0.9.0
+ * @author bornkiller &lt;hjj491229492@hotmail.com>
+ * @version v0.9.0
+ * @license MIT
+ * @copyright bornkiller NPM package 2014
+ */
+
+/**
+ * @description A module proxy requests with nginx style
+ * @module koa-proxy2
  * @requires utils
- * @param {ProxyOption} options - proxy options and formidable options
- * @throws {} the options must provide
+ * @param {Array.&lt;ProxyOption>} rules - proxy rule definition
+ * @param {Object} options - proxy config definition
+ * @throws {Error} the rules must provide array, even empty
  * @returns {Function} - generator function act koa middleware
  */
-module.exports = function(options) {
-  assert.ok(options &amp;&amp; Object === options.constructor, 'Options Object Required');
+module.exports = function(rules, options) {
+  assert.ok(util.isArray(rules), 'Array Rules Required');
+
+  options = _.defaults(options || {}, {
+    body_parse: true,
+    keep_query_string: true,
+    proxy_timeout: 3000,
+    proxy_methods: ['GET', 'POST', 'PUT', 'DELETE']
+  });
 
   return function* (next) {
-    var bodyEnabled = true;
+    // transfer request next when rules, methods mismatch
+    if (!utils.resolvePath(this.path, rules) || options.proxy_methods.indexOf(this.method) === -1) return yield next;
 
-    // skip body parse when parsed
-    if (!this.request.body &amp;&amp; this.method !== 'get' &amp;&amp; this.method !== 'delete') {
+    var multipart = false;
+
+    // skip body parse when parsed or disabled
+    if (!this.request.body &amp;&amp; options.body_parse) {
       // parse body when raw-body
       if (this.is('json', 'text', 'urlencoded')) this.request.body = yield parse(this);
       if (this.is('multipart')) {
-        bodyEnabled = false;
-        this.request.body = yield utils.resolveMultipart(this, options.formidable || {});
+        multipart = true;
+        this.request.body = yield utils.resolveMultipart(this);
       }
     }
 
     // respond error when occur in body parse
     if (util.isError(this.request.body)) return this.status = 500;
 
-    // proxy request when map rules match
-    if (utils.resolvePath(this.path, options.map)) {
-      // resolve available opts for request module
-      var opts = {
-        method: this.method,
-        url: utils.resolvePath(this.path, options.map),
-        headers: this.header
-      };
+    // resolve available opts for request module
+    var opts = {
+      method: this.method,
+      url: utils.resolvePath(this.path, rules),
+      headers: this.header
+    };
 
-      opts.body = bodyEnabled ? utils.resolveBody(this) : null;
-      opts.formData = !bodyEnabled ? this.request.body : null;
-      opts.json = this.is('json') === 'json';
-      opts.qs = !!options.keepQueryString ? this.query : {};
+    opts.body = !multipart ? this.request.body : null;
+    opts.form = this.is('urlencoded') ? this.request.body : null;
+    opts.formData = multipart ? this.request.body : null;
+    opts.json = this.is('json') === 'json';
+    opts.qs = !!options.keepQueryString ? this.query : {};
 
+    // comply the proxy
+    var response = yield request(opts);
 
-      // comply the proxy
-      var response = yield request(opts);
-
-      // respond client
-      this.status = response[0].statusCode;
-      this.set(response[0].headers);
-      this.body = response[0].body;
-      if (typeof options.transformResponse === 'function') options.transformResponse.apply(this);
-      return null;
-    }
-
-    yield next;
+    // respond client
+    this.status = response[0].statusCode;
+    this.set(response[0].headers);
+    this.body = response[0].body;
   };
 };</code></pre>
         </article>
@@ -123,13 +120,13 @@ module.exports = function(options) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-koa-proxy.html">koa-proxy</a></li><li><a href="module-utils_utils.html">utils/utils</a></li></ul><h3>Externals</h3><ul><li><a href="external-co-body.html">co-body</a></li><li><a href="external-formidable.html">formidable</a></li><li><a href="external-request.html">request</a></li><li><a href="external-thunkify.html">thunkify</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-koa-proxy2.html">koa-proxy2</a></li><li><a href="module-utils_utils.html">utils/utils</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0</a> on Thu May 28 2015 16:09:53 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0</a> on Mon Jun 01 2015 11:50:58 GMT+0800 (CST)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -47,53 +47,51 @@
 <img src="http://img.shields.io/coveralls/bornkiller/koa-proxy2.svg?style=flat" alt="Coverage Report">
 <img src="https://david-dm.org/bornkiller/koa-proxy2.svg?style=flat" alt="Package Dependency">
 <img src="https://david-dm.org/bornkiller/koa-proxy2/dev-status.svg?style=flat" alt="Package DevDependency"></p>
-<p>Make it convenience for mock nginx trick when use angular, make backward proxy easier.</p>
+<p>Make it convenience for mock nginx trick when use angular, make backward proxy easier. And please pay attention, the
+repo just for make development server when debug.</p>
 <h2>Inspiration</h2><p>use angular and nginx to develop web project, it make me feel helpless when communicate with real backend API through nginx, while I only mock static server, proxy server not included. To avoid directly modify the code in the nginx server root, and intercept specific URL for data mock, the scalable proxy module with nodejs become necessary. </p>
 <h2>Usage</h2><p>With time passing by, <code>koa-proxy2</code> integrate with body parser, therefore you don't have to use body parse middleware, like <code>koa-body</code> or something else, while never cause problem if you used for some reason. It support <code>json</code>, <code>urlencoded</code>, <code>multipart/form-data</code> proxy work well.</p>
-<p>Till now, options below provided for proxy-pass:</p>
+<p>I separate the <code>proxy rules</code> and <code>module configuration</code>.</p>
+<p>The <code>proxy rule</code> act like followings:</p>
 <pre class="prettyprint source lang-javascript"><code>{
-  map: {
-    '/proxy': 'http://127.0.0.1',
-    '=/nodejs': 'http://127.0.0.1',
-    '~^/story': 'http://127.0.0.1',
-    '~*/story': 'http://127.0.0.1',
-    '/slash': 'http://127.0.0.1/'
-  },
-  keepQueryString: false,
-  transformResponse: function() {
-    if (this.path === '/transform') {
-      this.type = 'text';
-      this.body = 'transformed plain text'
-    }
-  }
-}</code></pre><p><code>map</code> the proxy rules, just like nginx style.</p>
-<p>For above example:</p>
-<p><code>/proxy</code> is the same as <code>=/proxy</code>, <code>~</code> is regular expression match case sensitive, <code>~*</code> is almost the same as <code>~</code>, except case insensitive. when path map domain address, the final target URL will keep the request path, otherwise will
-ignore the path.</p>
-<p>request to <code>/proxy</code> will resolve to request to <code>http://127.0.0.1/proxy</code>; request to <code>/slash</code> will resolve to request to <code>http://127.0.0.1/</code>, rather than http://127.0.0.1/slash`.</p>
-<p><code>keepQueryString</code> to judge if reserve the query string after path.</p>
-<p><code>transformResponse</code> to transform the response when send back the client, inside the function, <code>this</code> point to <code>koa</code> context, so you can modify the response as  you think.</p>
-<p><code>formidable</code> module is used for <code>multipart/form-data</code> body parse, you can pass in <code>formidable</code> options with 
-the proxy-pass options, see <a href="https://github.com/felixge/node-formidable">https://github.com/felixge/node-formidable</a></p>
-<h2>Practice</h2><p>Assume all real backend api follow the pattern <code>/v1/*</code>, all static files are in <code>./static</code>, you will need:</p>
+  // URL match rule for specific path request proxy
+  proxy_location: '/v1/version',
+  // target backend, different between with URL or not
+  proxy_pass: 'http://api.google.com'
+}</code></pre><p><code>proxy_location</code> could be string or regular expression, when the original path match the string or regular expression, the proxy actived, otherwise, will just transfer the request next.</p>
+<p><code>proxy_pass</code> has different behaviour just like nginx. The above example, request <code>/v1/version</code> will resolved into <code>http://api.google.com/v1/version</code>, while when proxy_pass equals <code>http://api.google.com/</code> or with specific path, the original request path will omit.</p>
+<p>the <code>module configuration</code> act like belows:</p>
+<pre class="prettyprint source lang-javascript"><code>{
+  // whether parse the body
+  body_parse: true,
+  // reserve the query string after path.
+  keep_query_string: true,
+  // HTTP request timeout milliseconds
+  proxy_timeout: 3000,
+  // which method should proxy
+  proxy_methods: ['GET', 'POST', 'PUT', 'DELETE']
+}</code></pre><h2>Practice</h2><p>Assume all real backend api follow the pattern <code>/v1/*</code>, all static files are in <code>./static</code>, you will need:</p>
 <pre class="prettyprint source lang-javascript"><code>var path = require('path');
 var koa = require('koa');
 var serve = require('koa-static');
 var proxy = require('koa-proxy2');
 var app = koa();
 
-app.use(proxy({
-  map: {
-    '~/v1': 'http://127.0.0.1'
-  },
-  keepQueryString: true
-}));
+app.use(proxy([{
+    // URL match rule for specific path request proxy
+    proxy_location: /^\/v1/.*/,
+    // target backend, different between with URL or not
+    proxy_pass: 'http://api.google.com'
+  }], { proxy_timeout: 50000 }
+));
 app.use(serve(path.join(__dirname, 'static')));
 app.use(function *() {
     this.type = 'html';
     this.body = fs.readFileSync(path.join(__dirname, 'static/index.html'), {encoding: 'utf-8'});
 });
 app.listen(1336);</code></pre><h2>Change Log</h2><ul>
+<li>2015/06/01 v0.9.0
+Modify a more nginx style way, and maybe has several nodejs and iojs compatibility bug.</li>
 <li>2015/03/30 v0.7.2
 Fix fatal nodejs and iojs compatibility bug.</li>
 <li>2015/02/11 v0.7.0
@@ -122,13 +120,13 @@ Fix content transfer bugs.</li>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-koa-proxy.html">koa-proxy</a></li><li><a href="module-utils_utils.html">utils/utils</a></li></ul><h3>Externals</h3><ul><li><a href="external-co-body.html">co-body</a></li><li><a href="external-formidable.html">formidable</a></li><li><a href="external-request.html">request</a></li><li><a href="external-thunkify.html">thunkify</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-koa-proxy2.html">koa-proxy2</a></li><li><a href="module-utils_utils.html">utils/utils</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0</a> on Thu May 28 2015 16:09:53 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0</a> on Mon Jun 01 2015 11:50:58 GMT+0800 (CST)
 </footer>
 
 <script> prettyPrint(); </script>

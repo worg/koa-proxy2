@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Global</title>
+    <title>JSDoc: Module: koa-proxy2</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Global</h1>
+    <h1 class="page-title">Module: koa-proxy2</h1>
 
     
 
@@ -28,9 +28,8 @@
 
 <header>
     
-        <h2>
         
-        </h2>
+            
         
     
 </header>
@@ -39,95 +38,26 @@
     <div class="container-overview">
     
         
-
+            <div class="description">A module proxy requests with nginx style</div>
         
 
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
         
-    
-    </div>
-
-    
-
-    
-
-    
-
-     
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Type Definitions</h3>
-
-        
-                
-<h4 class="name" id="ProxyOption">ProxyOption</h4>
-
-
-
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
             
-<span class="param-type">Object</span>
-
-
-        </li>
-    </ul>
 
 
 
 
 
-    <h5 class="subsection-title">Properties:</h5>
 
+
+
+
+
+
+    <h5>Parameters:</h5>
     
 
-<table class="props">
+<table class="params">
     <thead>
     <tr>
         
@@ -149,16 +79,13 @@
 
         <tr>
             
-                <td class="name"><code>proxy_location</code></td>
+                <td class="name"><code>rules</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
-|
-
-<span class="param-type">RegExp</span>
+<span class="param-type">Array.&lt;<a href="global.html#ProxyOption">ProxyOption</a>></span>
 
 
             
@@ -168,20 +95,20 @@
 
             
 
-            <td class="description last">URL match rule for specific path request proxy</td>
+            <td class="description last">proxy rule definition</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>proxy_pass</code></td>
+                <td class="name"><code>options</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">Object</span>
 
 
             
@@ -191,12 +118,14 @@
 
             
 
-            <td class="description last">target backend, different between with URL or not</td>
+            <td class="description last">proxy config definition</td>
         </tr>
 
     
     </tbody>
 </table>
+
+
 
 
 
@@ -230,7 +159,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line11">line 11</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line26">line 26</a>
     </li></ul></dd>
     
 
@@ -246,7 +175,91 @@
 
 
 
-            
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        the rules must provide array, even empty
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - generator function act koa middleware
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+        <h3 class="subsection-title">Requires</h3>
+
+        <ul>
+            <li>module:utils</li>
+        </ul>
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+
     
 
     
