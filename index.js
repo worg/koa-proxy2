@@ -1,17 +1,4 @@
-/**
- * @external co-body
- * @see https://www.npmjs.com/package/co-body
- */
-
-/**
- * @external thunkify
- * @see https://www.npmjs.com/package/thunkify
- */
-
-/**
- * @external request
- * @see https://www.npmjs.com/package/request
- */
+"use strict";
 
 var assert =require('assert');
 var util =require('util');
@@ -23,14 +10,22 @@ var utils = require('./utils/utils.js');
 
 /**
  * @typedef {!Object} ProxyOption
- * @property {RegExp} proxy_location - URL match for specific path request proxy
- * @property {string} proxy_pass - backend proxy target
+ * @property {(string|RegExp)} proxy_location - URL match rule for specific path request proxy
+ * @property {string} proxy_pass - target backend, different between with URL or not
  */
 
 /**
  * A module proxy requests with nginx style
- * @module koa-proxy2
  * @version v0.9.0
+ * @author bornkiller <hjj491229492@hotmail.com>
+ * @version v0.9.0
+ * @license MIT
+ * @copyright bornkiller NPM package 2014
+ */
+
+/**
+ * @description A module proxy requests with nginx style
+ * @module koa-proxy2
  * @requires utils
  * @param {Array.<ProxyOption>} rules - proxy rule definition
  * @param {Object} options - proxy config definition

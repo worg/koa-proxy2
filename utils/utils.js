@@ -1,8 +1,3 @@
-/**
- * @external formidable
- * @see https://www.npmjs.com/package/formidable
- */
-
 "use strict";
 
 /*
@@ -17,8 +12,6 @@ var _ = require('underscore');
 /**
  * Export several useful method
  * @module utils/utils
- * @requires formidable
- * @requires _
  * @author bornkiller <hjj491229492@hotmail.com>
  * @version v0.9.0
  * @license MIT
@@ -26,9 +19,9 @@ var _ = require('underscore');
  */
 
 /**
- * @description Judge map rules match, return final URL when match, false when mismatch
+ * @description resolve rules match, return final URL when match, false when mismatch
  * @param {string} path - the http request path
- * @param {object} rules - the map relation between origin request path and real backend API
+ * @param {object} rules - the map relationship between origin request path and real backend API
  * @returns {boolean|string}
  */
 exports.resolvePath = function(path, rules) {
