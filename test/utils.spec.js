@@ -71,3 +71,70 @@ describe('utils multipart resolve function', function () {
     server.close();
   });
 });
+
+describe('utils should skip next', function () {
+  var context, options, rules;
+
+  beforeEach(function () {
+    context = {
+      path: '/hello/world',
+      method: 'OPTIONS'
+    } ;
+    options = { proxy_methods: ['GET', 'POST', 'PUT', 'DELETE'] };
+    rules = [
+      {
+        proxy_location: /user\/$/,
+        proxy_pass: 'http://www.reverseflower.com/list/'
+      }
+    ];
+  });
+
+  it('should judge whether skip into next', function () {
+    utils.shouldSkipNext(context, rules, options).should.be.true;
+  });
+
+  it('should judge whether skip into next', function () {
+    context.method = 'GET';
+    utils.shouldSkipNext(context, rules, options).should.be.true;
+  });
+
+  it('should judge whether skip into next', function () {
+    context.path = '/list/user/';
+    utils.shouldSkipNext(context, rules, options).should.be.true;
+  });
+
+  it('should judge whether skip into next', function () {
+    context.path = '/list/user/';
+    context.method = 'GET';
+    utils.shouldSkipNext(context, rules, options).should.be.false;
+  });
+});
+
+describe('utils should parse body', function () {
+  var context, options;
+
+  beforeEach(function () {
+    context = { request: { body: {} } };
+    options = { body_parse: false}
+  });
+
+  it('should judge whether to parse request body', function () {
+    utils.shouldParseBody(context, options).should.be.false;
+  });
+
+  it('should judge whether to parse request body', function () {
+    options.body_parse = true;
+    utils.shouldParseBody(context, options).should.be.false;
+  });
+
+  it('should judge whether to parse request body', function () {
+    delete context.request.body;
+    utils.shouldParseBody(context, options).should.be.false;
+  });
+
+  it('should judge whether to parse request body', function () {
+    delete context.request.body;
+    options.body_parse = true;
+    utils.shouldParseBody(context, options).should.be.true;
+  });
+});

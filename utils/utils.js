@@ -62,3 +62,40 @@ exports.resolveMultipart = function(req, opts) {
     form.parse(req);
   }
 };
+
+exports.configRequestBody = function(self) {
+  var opts = {};
+  switch (true) {
+    case self.is('urlencoded'):
+      opts.form = self.request.body;
+      break;
+    case self.is('multipart'):
+      opts.formData = self.request.body;
+      break;
+    default:
+      opts.body = self.request.body;
+      opts.json = this.is('json') === 'json'
+  }
+  return opts;
+};
+
+/**
+ * @description - whether should parse request body inner koa-proxy2
+ * @param {object} self - koa request context
+ * @param {Array.<ProxyOption>} rules - proxy rule definition
+ * @param {object} options - passed options
+ * @returns {Boolean}
+ */
+exports.shouldSkipNext = function(self, rules, options) {
+  return !this.resolvePath(self.path, rules) || options.proxy_methods.indexOf(self.method) === -1
+};
+
+/**
+ * @description - whether should parse request body inner koa-proxy2
+ * @param {object} self - koa request context
+ * @param {object} options - passed options
+ * @returns {Boolean}
+ */
+exports.shouldParseBody = function(self, options) {
+  return !self.request.body && options.body_parse
+};
