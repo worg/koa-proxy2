@@ -66,15 +66,15 @@ exports.resolveMultipart = function(req, opts) {
 exports.configRequestBody = function(self) {
   var opts = {};
   switch (true) {
-    case self.is('urlencoded'):
+    case self.is('urlencoded') === 'urlencoded':
       opts.form = self.request.body;
       break;
-    case self.is('multipart'):
+    case self.is('multipart') === 'multipart':
       opts.formData = self.request.body;
       break;
     default:
       opts.body = self.request.body;
-      opts.json = this.is('json') === 'json'
+      opts.json = self.is('json') === 'json'
   }
   return opts;
 };

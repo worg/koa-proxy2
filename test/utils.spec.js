@@ -138,3 +138,41 @@ describe('utils should parse body', function () {
     utils.shouldParseBody(context, options).should.be.true;
   });
 });
+
+describe('config request content with different form', function () {
+  var context, result;
+
+  beforeEach(function () {
+    context = { request: {} };
+  });
+
+  it('should config form when x-www-form-urlencoded', function () {
+    context.is = function(type) { return type === 'urlencoded' ? type : false };
+    result = utils.configRequestBody(context);
+    Object.keys(result).should.have.length(1);
+    result.should.have.ownProperty('form')
+  });
+
+  it('should config form when x-www-form-urlencoded', function () {
+    context.is = function(type) { return type === 'multipart' ? type : false };
+    result = utils.configRequestBody(context);
+    Object.keys(result).should.have.length(1);
+    result.should.have.ownProperty('formData')
+  });
+
+  it('should config form when x-www-form-urlencoded', function () {
+    context.is = function(type) { return type === 'json' ? type : false };
+    result = utils.configRequestBody(context);
+    Object.keys(result).should.have.length(2);
+    result.should.have.ownProperty('body');
+    result.should.have.property('json', true);
+  });
+
+  it('should config form when x-www-form-urlencoded', function () {
+    context.is = function(type) { return type === 'json' ? false : false };
+    result = utils.configRequestBody(context);
+    Object.keys(result).should.have.length(2);
+    result.should.have.ownProperty('body');
+    result.should.have.property('json', false);
+  });
+});
