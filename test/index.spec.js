@@ -5,6 +5,13 @@ var koa = require('koa');
 var proxy = require('../index');
 var express = require('./mock/server.js');
 
+describe('proxy server arguments', function () {
+  it('should not throw error whether options missed or not', function () {
+    should.doesNotThrow(function() {proxy();});
+    should.doesNotThrow(function() {proxy({});});
+  });
+});
+
 describe('proxy server', function () {
   var server
     , proxy_server
@@ -16,7 +23,7 @@ describe('proxy server', function () {
 
   it('should transfer next when rules none mismatch', function (done) {
     app = koa();
-    app.use(proxy([]));
+    app.use(proxy({}));
     app.use(function *() {
       this.body = 'transfer stream';
     });
@@ -32,13 +39,13 @@ describe('proxy server', function () {
 
   it('should transfer the request next when rules match, methods not match', function (done) {
     app = koa();
-    app.use(proxy([{
+    app.use(proxy({
+      proxy_methods: ['POST', 'PUT'],
+      proxy_rules: [{
         proxy_location: '/version/',
         proxy_pass: 'http://localhost:5000/proxy/'
-      }], {
-        proxy_methods: ['POST', 'PUT']
-      }
-    ));
+      }]
+    }));
     app.use(function *() {
       this.body = 'transfer stream';
     });
@@ -55,11 +62,12 @@ describe('proxy server', function () {
 
   it('should execute the proxy when rules match with query string', function (done) {
     app = koa();
-    app.use(proxy([{
+    app.use(proxy({
+      proxy_rules: [{
         proxy_location: '/version/',
         proxy_pass: 'http://localhost:5000/proxy/'
       }]
-    ));
+    }));
 
     proxy_server = http.createServer(app.callback()).listen(5001);
 
@@ -75,13 +83,13 @@ describe('proxy server', function () {
 
   it('should execute the proxy when rules match without query string', function (done) {
     app = koa();
-    app.use(proxy([{
+    app.use(proxy({
+      proxy_rules: [{
         proxy_location: '/version/',
         proxy_pass: 'http://localhost:5000/proxy/'
-      }], {
-        keep_query_string: false
-      }
-    ));
+      }],
+      keep_query_string: false
+    }));
 
     proxy_server = http.createServer(app.callback()).listen(5001);
 

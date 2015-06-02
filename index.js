@@ -26,34 +26,26 @@ var utils = require('./utils/utils.js');
  * @description A module proxy requests with nginx style
  * @module koa-proxy2
  * @requires utils
- * @param {Array.<ProxyOption>} rules - proxy rule definition
  * @param {Object} options - proxy config definition
  * @throws {Error} the rules must provide array, even empty
  * @returns {Function} - generator function act koa middleware
  */
-module.exports = function(rules, options) {
-  assert.ok(util.isArray(rules), 'Array Rules Required');
-
+module.exports = function(options) {
   options = _.defaults(options || {}, {
     body_parse: true,
     keep_query_string: true,
     proxy_timeout: 3000,
-    proxy_methods: ['GET', 'POST', 'PUT', 'DELETE']
+    proxy_methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    proxy_rules: []
   });
 
   return function* (next) {
     // transfer request next when rules, methods mismatch
-    if (utils.shouldSkipNext(this, rules, options)) return yield next;
+    if (utils.shouldSkipNext(this, options)) return yield next;
 
     // alias for koa context
-    var self = this;
-    // resolve available opts for request module
-    var opts = {
-      method: this.method,
-      url: utils.resolvePath(this.path, rules),
-      headers: this.header,
-      qs: !!options.keep_query_string ? this.query : {}
-    };
+    var self = this
+      , opts;
 
     // skip body parse when parsed or disabled
     if (utils.shouldParseBody(self, options)) this.request.body = yield utils.execParseBody(self, false);
@@ -61,7 +53,7 @@ module.exports = function(rules, options) {
     // respond error when occur in body parse
     if (util.isError(this.request.body)) return this.status = 500;
 
-    if (!_.isEmpty(self.request.body)) opts = _.extend(opts, utils.configRequestBody(self));
+    opts = utils.configRequestOptions(self, options);
 
     // comply the proxy
     var response = yield request(opts);

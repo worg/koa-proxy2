@@ -74,6 +74,8 @@ exports.configRequestOptions = function(self, options) {
   };
 
   switch (true) {
+    case _.isEmpty(self.request.body):
+      break;
     case self.is('urlencoded') === 'urlencoded':
       opts.form = self.request.body;
       break;

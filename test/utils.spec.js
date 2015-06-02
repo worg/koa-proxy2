@@ -228,8 +228,16 @@ describe('config request opts within different request environment', function ()
     result.should.have.property('qs', {});
   });
 
+  it('should not config content related when request body empty', function () {
+    result = utils.configRequestOptions(context, options);
+    result.should.not.have.ownProperty('form');
+    result.should.not.have.ownProperty('formData');
+    result.should.not.have.ownProperty('body');
+  });
+
   it('should config form when x-www-form-urlencoded', function () {
     context.is = sinon.stub().returns('urlencoded');
+    context.request.body = 'title=hello&content=world';
     result = utils.configRequestOptions(context, options);
     result.should.have.ownProperty('form');
     result.should.not.have.ownProperty('formData');
@@ -238,6 +246,7 @@ describe('config request opts within different request environment', function ()
 
   it('should config form when multipart', function () {
     context.is = sinon.stub().returns('multipart');
+    context.request.body = new Buffer('hello world');
     result = utils.configRequestOptions(context, options);
     result.should.have.ownProperty('formData');
     result.should.not.have.ownProperty('form');
@@ -246,6 +255,7 @@ describe('config request opts within different request environment', function ()
 
   it('should config form when application/json ', function () {
     context.is = sinon.stub().returns('json');
+    context.request.body = { hello: 'world' };
     result = utils.configRequestOptions(context, options);
     result.should.have.ownProperty('body');
     result.should.have.property('json', true);
@@ -255,6 +265,7 @@ describe('config request opts within different request environment', function ()
 
   it('should config form when text/plain', function () {
     context.is = sinon.stub().returns(false);
+    context.request.body = 'hello world!';
     result = utils.configRequestOptions(context, options);
     result.should.have.ownProperty('body');
     result.should.have.property('json', false);
