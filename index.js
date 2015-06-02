@@ -60,10 +60,10 @@ module.exports = function(rules, options) {
     if (utils.shouldParseBody(self, options)) {
       // parse body when raw-body
       switch (true) {
-        case this.is('json', 'text', 'urlencoded'):
+        case _.isString(self.is('json', 'text', 'urlencoded')):
           self.request.body = yield parse(self);
           break;
-        case self.is('multipart'):
+        case _.isString(self.is('multipart')):
           self.request.body = yield utils.resolveMultipart(self);
           break;
       }
