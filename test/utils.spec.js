@@ -135,33 +135,35 @@ describe('utils should skip next', function () {
       path: '/hello/world',
       method: 'OPTIONS'
     } ;
-    options = { proxy_methods: ['GET', 'POST', 'PUT', 'DELETE'] };
-    rules = [
-      {
-        proxy_location: /user\/$/,
-        proxy_pass: 'http://www.reverseflower.com/list/'
-      }
-    ];
+    options = {
+      proxy_methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      proxy_rules: [
+        {
+          proxy_location: /user\/$/,
+          proxy_pass: 'http://www.reverseflower.com/list/'
+        }
+      ]
+    };
   });
 
   it('should judge whether skip into next', function () {
-    utils.shouldSkipNext(context, rules, options).should.be.true;
+    utils.shouldSkipNext(context, options).should.be.true;
   });
 
   it('should judge whether skip into next', function () {
     context.method = 'GET';
-    utils.shouldSkipNext(context, rules, options).should.be.true;
+    utils.shouldSkipNext(context, options).should.be.true;
   });
 
   it('should judge whether skip into next', function () {
     context.path = '/list/user/';
-    utils.shouldSkipNext(context, rules, options).should.be.true;
+    utils.shouldSkipNext(context, options).should.be.true;
   });
 
   it('should judge whether skip into next', function () {
     context.path = '/list/user/';
     context.method = 'GET';
-    utils.shouldSkipNext(context, rules, options).should.be.false;
+    utils.shouldSkipNext(context, options).should.be.false;
   });
 });
 
@@ -194,40 +196,69 @@ describe('utils should parse body', function () {
   });
 });
 
-describe('config request content with different form', function () {
-  var context, result;
+describe('config request opts within different request environment', function () {
+  var context = {
+    method: 'GET',
+    path: '/list/user/',
+    header: {},
+    query: { title: 'hello' },
+    request: {}
+  };
+  var options = {
+    keep_query_string: true,
+    proxy_rules: [{
+      proxy_location: /user\/$/,
+      proxy_pass: 'http://www.reverseflower.com/list/'
+    }]
+  };
+  var result = null;
 
-  beforeEach(function () {
-    context = { request: {} };
+  it('should config none-content configurations', function () {
+    context.is = sinon.stub().returns(false);
+    result = utils.configRequestOptions(context, options);
+    result.should.have.property('url', 'http://www.reverseflower.com/list/');
+    result.should.have.property('qs', { title: 'hello' });
+  });
+
+  it('should config none-content configurations', function () {
+    context.is = sinon.stub().returns(false);
+    options.keep_query_string = false;
+    result = utils.configRequestOptions(context, options);
+    result.should.have.property('url', 'http://www.reverseflower.com/list/');
+    result.should.have.property('qs', {});
   });
 
   it('should config form when x-www-form-urlencoded', function () {
     context.is = sinon.stub().returns('urlencoded');
-    result = utils.configRequestBody(context);
-    Object.keys(result).should.have.length(1);
-    result.should.have.ownProperty('form')
+    result = utils.configRequestOptions(context, options);
+    result.should.have.ownProperty('form');
+    result.should.not.have.ownProperty('formData');
+    result.should.not.have.ownProperty('body');
   });
 
   it('should config form when multipart', function () {
     context.is = sinon.stub().returns('multipart');
-    result = utils.configRequestBody(context);
-    Object.keys(result).should.have.length(1);
-    result.should.have.ownProperty('formData')
+    result = utils.configRequestOptions(context, options);
+    result.should.have.ownProperty('formData');
+    result.should.not.have.ownProperty('form');
+    result.should.not.have.ownProperty('body');
   });
 
   it('should config form when application/json ', function () {
     context.is = sinon.stub().returns('json');
-    result = utils.configRequestBody(context);
-    Object.keys(result).should.have.length(2);
+    result = utils.configRequestOptions(context, options);
     result.should.have.ownProperty('body');
     result.should.have.property('json', true);
+    result.should.not.have.ownProperty('form');
+    result.should.not.have.ownProperty('formData');
   });
 
   it('should config form when text/plain', function () {
     context.is = sinon.stub().returns(false);
-    result = utils.configRequestBody(context);
-    Object.keys(result).should.have.length(2);
+    result = utils.configRequestOptions(context, options);
     result.should.have.ownProperty('body');
     result.should.have.property('json', false);
+    result.should.not.have.ownProperty('form');
+    result.should.not.have.ownProperty('formData');
   });
 });

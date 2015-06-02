@@ -61,10 +61,18 @@ exports.execParseBody = function(self, debug) {
 /**
  * @description - config body content for final HTTP request
  * @param {object} self - koa request context
+ * @param {object} options - proxy config options
  * @returns {Object} - content configuration pass into request module
  */
-exports.configRequestBody = function(self) {
-  var opts = {};
+exports.configRequestOptions = function(self, options) {
+  // resolve available opts for request module
+  var opts = {
+    method: self.method,
+    url: this.resolvePath(self.path, options.proxy_rules),
+    headers: self.header,
+    qs: !!options.keep_query_string ? self.query : {}
+  };
+
   switch (true) {
     case self.is('urlencoded') === 'urlencoded':
       opts.form = self.request.body;
@@ -82,12 +90,11 @@ exports.configRequestBody = function(self) {
 /**
  * @description - whether should parse request body inner koa-proxy2
  * @param {object} self - koa request context
- * @param {Array.<ProxyOption>} rules - proxy rule definition
- * @param {object} options - passed options
+ * @param {object} options - configure options
  * @returns {Boolean}
  */
-exports.shouldSkipNext = function(self, rules, options) {
-  return !this.resolvePath(self.path, rules) || options.proxy_methods.indexOf(self.method) === -1
+exports.shouldSkipNext = function(self, options) {
+  return !this.resolvePath(self.path, options.proxy_rules) || options.proxy_methods.indexOf(self.method) === -1
 };
 
 /**

@@ -5,13 +5,6 @@ var koa = require('koa');
 var proxy = require('../index');
 var express = require('./mock/server.js');
 
-describe('proxy server argument', function () {
-  it('should throw error when rules not array', function () {
-    should.doesNotThrow(function() { proxy([]) });
-    should.throws(function() { proxy({title: 'koa proxy'}) }, 'Array Rules Required');
-  });
-});
-
 describe('proxy server', function () {
   var server
     , proxy_server
