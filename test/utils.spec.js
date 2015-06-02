@@ -6,6 +6,7 @@ var http = require('http');
 var koa = require('koa');
 var request = require('superagent');
 var should = require('should');
+var sinon = require('sinon');
 var utils = require('../utils/utils.js');
 
 describe('utils path resolve function', function () {
@@ -198,29 +199,29 @@ describe('config request content with different form', function () {
   });
 
   it('should config form when x-www-form-urlencoded', function () {
-    context.is = function(type) { return type === 'urlencoded' ? type : false };
+    context.is = sinon.stub().returns('urlencoded');
     result = utils.configRequestBody(context);
     Object.keys(result).should.have.length(1);
     result.should.have.ownProperty('form')
   });
 
-  it('should config form when x-www-form-urlencoded', function () {
-    context.is = function(type) { return type === 'multipart' ? type : false };
+  it('should config form when multipart', function () {
+    context.is = sinon.stub().returns('multipart');
     result = utils.configRequestBody(context);
     Object.keys(result).should.have.length(1);
     result.should.have.ownProperty('formData')
   });
 
-  it('should config form when x-www-form-urlencoded', function () {
-    context.is = function(type) { return type === 'json' ? type : false };
+  it('should config form when application/json ', function () {
+    context.is = sinon.stub().returns('json');
     result = utils.configRequestBody(context);
     Object.keys(result).should.have.length(2);
     result.should.have.ownProperty('body');
     result.should.have.property('json', true);
   });
 
-  it('should config form when x-www-form-urlencoded', function () {
-    context.is = function(type) { return type === 'json' ? false : false };
+  it('should config form when text/plain', function () {
+    context.is = sinon.stub().returns(false);
     result = utils.configRequestBody(context);
     Object.keys(result).should.have.length(2);
     result.should.have.ownProperty('body');
