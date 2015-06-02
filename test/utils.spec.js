@@ -41,19 +41,18 @@ describe('utils path resolve function', function () {
   });
 });
 
-describe('utils multipart resolve function', function () {
+describe('utils parse body', function () {
   var app, server;
 
   beforeEach(function () {
     app = koa();
   });
 
-  it('should parse multipart body correctly', function (done) {
+  it('should parse urlencoded body correctly', function (done) {
     app.use(function *() {
-      this.body = yield utils.resolveMultipart(this);
-      this.body.should.have.property('title', 'koa-proxy');
-      this.body.should.have.property('content', 'kiss you');
-      this.body.should.have.property('youth', new Buffer('youth is not a time of life!'));
+      this.body = yield utils.resolveBody(this);
+      this.body.should.have.property('hello', 'world');
+      this.body.should.have.property('butterfly', 'pretty');
       done();
     });
 
@@ -61,10 +60,41 @@ describe('utils multipart resolve function', function () {
 
     request
       .post('http://localhost:5000')
-      .field('title', 'koa-proxy')
-      .field('content', 'kiss you')
-      .attach('youth', fs.createReadStream(path.join(__dirname, 'mock/youth.txt')))
-      .end(function(err, res) {})
+      .send('hello=world')
+      .send('butterfly=pretty')
+      .end();
+  });
+
+  it('should parse json body correctly', function (done) {
+    app.use(function *() {
+      this.body = yield utils.resolveBody(this);
+      this.body.should.have.property('love', 'strength');
+      this.body.should.have.property('age', 23);
+      done();
+    });
+
+    server = http.createServer(app.callback()).listen(5000);
+
+    request
+      .post('http://localhost:5000')
+      .send({love: 'strength', age: 23})
+      .end();
+  });
+
+  it('should parse text plain body correctly', function (done) {
+    app.use(function *() {
+      this.body = yield utils.resolveBody(this);
+      this.body.should.equal('live long enough to become bad guy');
+      done();
+    });
+
+    server = http.createServer(app.callback()).listen(5000);
+
+    request
+      .post('http://localhost:5000')
+      .type('text/plain')
+      .send('live long enough to become bad guy')
+      .end();
   });
 
   it('should parse multipart body correctly', function (done) {
@@ -88,6 +118,8 @@ describe('utils multipart resolve function', function () {
 
   afterEach(function () {
     server.close();
+    app = null;
+    server = null;
   });
 });
 

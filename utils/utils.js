@@ -6,6 +6,7 @@
 var assert = require('assert');
 var fs = require('fs');
 var util = require('util');
+var parse = require('co-body');
 var formidable = require('formidable');
 var _ = require('underscore');
 
@@ -34,6 +35,15 @@ exports.resolvePath = function(path, rules) {
   return result.proxy_pass.replace(new RegExp('https?:\/\/'), '').indexOf('/') === -1 ? result.proxy_pass + path : result.proxy_pass;
 };
 
+
+/**
+ * parse multipart/form-data body and stream next
+ * @param {object} req - koa context
+ * @returns {Function} - yieldable Object
+ */
+exports.resolveBody = function(req) {
+  return parse(req);
+};
 /**
  * parse multipart/form-data body and stream next
  * @param {object} req - koa context or koa request wrapper
@@ -41,8 +51,6 @@ exports.resolvePath = function(path, rules) {
  * @returns {Function} - yieldable function
  */
 exports.resolveMultipart = function(req, opts) {
-  req = req.req || req;
-
   return function(done) {
     var data = {};
     var form = new formidable.IncomingForm(opts);
