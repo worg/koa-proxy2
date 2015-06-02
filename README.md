@@ -79,8 +79,6 @@ Modify a more nginx style way, and maybe has several nodejs and iojs compatibili
 Fix fatal nodejs and iojs compatibility bug.
 + 2015/02/11 v0.7.0
 Fix fatal proxy bug, add `text/plain` body support, update all module dependency.
-+ 2015/02/06 v0.6.5
-Add `transformResponse` options for response transform.
 + 2015/02/02 v0.6.0
 Remove unnecessary dependent package, fix cookie transfer fatal BUG.
 + 2014/12/24 v0.5.5
