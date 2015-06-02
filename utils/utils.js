@@ -7,7 +7,6 @@ var assert = require('assert');
 var fs = require('fs');
 var util = require('util');
 var parse = require('co-body');
-var formidable = require('formidable');
 var _ = require('underscore');
 
 /**
@@ -44,33 +43,19 @@ exports.resolvePath = function(path, rules) {
 exports.resolveBody = function(req) {
   return parse(req);
 };
-/**
- * parse multipart/form-data body and stream next
- * @param {object} req - koa context or koa request wrapper
- * @param {object} opts - options pass to formidable module
- * @returns {Function} - yieldable function
- */
-exports.resolveMultipart = function(req, opts) {
-  return function(done) {
-    var data = {};
-    var form = new formidable.IncomingForm(opts);
-    form
-      .on('field', function(name, value) {
-        data[name] = value;
-      })
-      .on('file', function(name, file) {
-        data[name] = fs.readFileSync(file.path)
-      })
-      .on('error', function(error) {
-        done(error);
-      })
-      .on('end', function() {
-        done(null, data);
-      });
-    form.parse(req);
-  }
+
+exports.execParseBody = function(self) {
+  // parse body when raw-body
+  if (_.isString(self.is('json', 'text', 'urlencoded'))) return parse(self);
+  if (_.isString(self.is('multipart'))) return this.resolveMultipart(self);
+  return {};
 };
 
+/**
+ * @description - config body content for final HTTP request
+ * @param {object} self - koa request context
+ * @returns {Object} - content configuration pass into request module
+ */
 exports.configRequestBody = function(self) {
   var opts = {};
   switch (true) {
