@@ -104,7 +104,27 @@ describe('utils parse body request environment', function () {
 });
 
 describe('utils parse body mode switch', function () {
+  var context = {};
 
+  beforeEach(function () {
+    context.is = sinon.stub();
+  });
+
+  it('should execute co-body way', function () {
+    context.is.returns('json');
+    utils.execParseBody(context, true).should.equal('co-body');
+  });
+
+  it('should execute multipart way', function () {
+    context.is.onCall(0).returns(false);
+    context.is.onCall(1).returns('multipart');
+    utils.execParseBody(context, true).should.equal('multipart');
+  });
+
+  it('should execute none content way', function () {
+    context.is.returns(false);
+    utils.execParseBody(context, true).should.eql({});
+  });
 });
 
 describe('utils should skip next', function () {

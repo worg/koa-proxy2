@@ -6,8 +6,9 @@
 var assert = require('assert');
 var fs = require('fs');
 var util = require('util');
-var parse = require('co-body');
 var _ = require('underscore');
+var parse = require('co-body');
+var multipart = require('./multipart');
 
 /**
  * Export several useful method
@@ -44,10 +45,16 @@ exports.resolveBody = function(req) {
   return parse(req);
 };
 
-exports.execParseBody = function(self) {
+/**
+ * @description - choose right mode for parse request body
+ * @param {object} self - koa request context
+ * @param {boolean} debug - whether in UT environment
+ * @returns {Object} - yieldable object
+ */
+exports.execParseBody = function(self, debug) {
   // parse body when raw-body
-  if (_.isString(self.is('json', 'text', 'urlencoded'))) return parse(self);
-  if (_.isString(self.is('multipart'))) return this.resolveMultipart(self);
+  if (_.isString(self.is('json', 'text', 'urlencoded'))) return !debug ? parse(self) : 'co-body';
+  if (_.isString(self.is('multipart'))) return !debug ? multipart(self) : 'multipart';
   return {};
 };
 

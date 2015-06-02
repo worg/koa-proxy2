@@ -2,7 +2,6 @@
 
 var assert =require('assert');
 var util =require('util');
-var parse = require('co-body');
 var thunkify = require('thunkify');
 var request = thunkify(require('request'));
 var _ = require('underscore');
@@ -57,17 +56,7 @@ module.exports = function(rules, options) {
     };
 
     // skip body parse when parsed or disabled
-    if (utils.shouldParseBody(self, options)) {
-      // parse body when raw-body
-      switch (true) {
-        case _.isString(self.is('json', 'text', 'urlencoded')):
-          self.request.body = yield parse(self);
-          break;
-        case _.isString(self.is('multipart')):
-          self.request.body = yield utils.resolveMultipart(self);
-          break;
-      }
-    }
+    if (utils.shouldParseBody(self, options)) this.request.body = yield utils.execParseBody(self, false);
 
     // respond error when occur in body parse
     if (util.isError(this.request.body)) return this.status = 500;
