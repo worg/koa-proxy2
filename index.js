@@ -1,6 +1,5 @@
 "use strict";
 
-var assert =require('assert');
 var util =require('util');
 var thunkify = require('thunkify');
 var request = thunkify(require('request'));
@@ -8,7 +7,7 @@ var _ = require('underscore');
 var utils = require('./utils/utils.js');
 
 /**
- * @typedef {!Object} ProxyOption
+ * @typedef {!Object} ProxyRule
  * @property {(string|RegExp)} proxy_location - URL match rule for specific path request proxy
  * @property {string} proxy_pass - target backend, different between with URL or not
  */
@@ -27,7 +26,6 @@ var utils = require('./utils/utils.js');
  * @module koa-proxy2
  * @requires utils
  * @param {Object} options - proxy config definition
- * @throws {Error} the rules must provide array, even empty
  * @returns {Function} - generator function act koa middleware
  */
 module.exports = function(options) {

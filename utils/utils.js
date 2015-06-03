@@ -35,9 +35,28 @@ exports.resolvePath = function(path, rules) {
   return result.proxy_pass.replace(new RegExp('https?:\/\/'), '').indexOf('/') === -1 ? result.proxy_pass + path : result.proxy_pass;
 };
 
+/**
+ * @description - whether should parse request body inner koa-proxy2
+ * @param {object} self - koa request context
+ * @param {object} options - configure options
+ * @returns {Boolean}
+ */
+exports.shouldSkipNext = function(self, options) {
+  return !this.resolvePath(self.path, options.proxy_rules) || options.proxy_methods.indexOf(self.method) === -1
+};
 
 /**
- * parse multipart/form-data body and stream next
+ * @description - whether should parse request body inner koa-proxy2
+ * @param {object} self - koa request context
+ * @param {object} options - passed options
+ * @returns {Boolean}
+ */
+exports.shouldParseBody = function(self, options) {
+  return !self.request.body && options.body_parse
+};
+
+/**
+ * parse text, json, urlencoded HTTP body
  * @param {object} req - koa context
  * @returns {Function} - yieldable Object
  */
@@ -87,24 +106,4 @@ exports.configRequestOptions = function(self, options) {
       opts.json = self.is('json') === 'json'
   }
   return opts;
-};
-
-/**
- * @description - whether should parse request body inner koa-proxy2
- * @param {object} self - koa request context
- * @param {object} options - configure options
- * @returns {Boolean}
- */
-exports.shouldSkipNext = function(self, options) {
-  return !this.resolvePath(self.path, options.proxy_rules) || options.proxy_methods.indexOf(self.method) === -1
-};
-
-/**
- * @description - whether should parse request body inner koa-proxy2
- * @param {object} self - koa request context
- * @param {object} options - passed options
- * @returns {Boolean}
- */
-exports.shouldParseBody = function(self, options) {
-  return !self.request.body && options.body_parse
 };
