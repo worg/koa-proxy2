@@ -54,7 +54,7 @@ exports.resolveBody = function(req) {
 exports.execParseBody = function(self, debug) {
   // parse body when raw-body
   if (_.isString(self.is('json', 'text', 'urlencoded'))) return !debug ? parse(self) : 'co-body';
-  if (_.isString(self.is('multipart'))) return !debug ? multipart(self) : 'multipart';
+  if (_.isString(self.is('multipart'))) return !debug ? multipart(self.req) : 'multipart';
   return {};
 };
 

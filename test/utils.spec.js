@@ -1,6 +1,8 @@
 "use strict";
 
 var http = require('http');
+var fs = require('fs');
+var path = require('path');
 var koa = require('koa');
 var request = require('superagent');
 var should = require('should');
@@ -103,7 +105,7 @@ describe('utils parse body request environment', function () {
   });
 });
 
-describe('utils parse body mode switch', function () {
+describe('utils parse body automatically choose mode', function () {
   var context = {};
 
   beforeEach(function () {
@@ -124,6 +126,65 @@ describe('utils parse body mode switch', function () {
   it('should execute none content way', function () {
     context.is.returns(false);
     utils.execParseBody(context, true).should.eql({});
+  });
+});
+
+describe('utils parse body automatically request environment', function () {
+  var app, server;
+
+  beforeEach(function () {
+    app = koa();
+  });
+
+  it('should parse urlencoded body correctly through automatic mode', function (done) {
+    app.use(function *(next) {
+      var self = this;
+      this.body = yield utils.execParseBody(self);
+      yield next;
+    });
+    app.use(function *() {
+      this.body.should.have.property('hello', 'world');
+      this.body.should.have.property('butterfly', 'pretty');
+      done();
+    });
+
+    server = http.createServer(app.callback()).listen(5005);
+
+    request
+      .post('http://localhost:5005')
+      .send('hello=world')
+      .send('butterfly=pretty')
+      .end();
+  });
+
+  it('should parse multipart body correctly through automatic mode', function (done) {
+    app.use(function *(next) {
+      var self = this;
+      this.body = yield utils.execParseBody(self);
+      yield next;
+    });
+
+    app.use(function *() {
+      this.body.should.have.property('title', 'koa-proxy');
+      this.body.should.have.property('content', 'kiss you');
+      this.body.should.have.property('youth', new Buffer('youth is not a time of life!'));
+      done();
+    });
+
+    server = http.createServer(app.callback()).listen(5005);
+
+    request
+      .post('http://localhost:5005')
+      .field('title', 'koa-proxy')
+      .field('content', 'kiss you')
+      .attach('youth', fs.createReadStream(path.join(__dirname, 'mock/youth.txt')))
+      .end()
+  });
+
+  afterEach(function () {
+    server.close();
+    app = null;
+    server = null;
   });
 });
 

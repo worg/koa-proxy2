@@ -27,6 +27,6 @@ describe('multipart parse function', function () {
       .field('title', 'koa-proxy')
       .field('content', 'kiss you')
       .attach('youth', fs.createReadStream(path.join(__dirname, 'mock/youth.txt')))
-      .end(function(err, res) {})
+      .end()
   });
 });
