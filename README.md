@@ -15,7 +15,7 @@ use angular and nginx to develop web project, it make me feel helpless when comm
 ## Usage
 With time passing by, `koa-proxy2` integrate with body parser, therefore you don't have to use body parse middleware, like `koa-body` or something else, while never cause problem if you used for some reason. It support `json`, `urlencoded`, `multipart/form-data` proxy work well.
 
-I separate the `proxy rules` and `module configuration`.
+I separate the `proxy rule` alone.
 
 The `proxy rule` act like followings:
 
@@ -36,14 +36,19 @@ the `module configuration` act like belows:
 
 ```javascript	
 {
-  // whether parse the body
+  // whether parse the body, default true
   body_parse: true,
-  // reserve the query string after path.
+  // reserve the query string after path, default true.
   keep_query_string: true,
-  // HTTP request timeout milliseconds
+  // HTTP request timeout milliseconds, default 3000
   proxy_timeout: 3000,
-  // which method should proxy
-  proxy_methods: ['GET', 'POST', 'PUT', 'DELETE']
+  // which method should proxy, default ['GET', 'POST', 'PUT', 'DELETE']
+  proxy_methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  // array consist of proxy rule, default []
+  proxy_rules: [{
+    proxy_location: '/version/',
+    proxy_pass: 'http://localhost:5000/proxy/'
+  }]
 }
 ```
 
@@ -57,13 +62,14 @@ var serve = require('koa-static');
 var proxy = require('koa-proxy2');
 var app = koa();
 
-app.use(proxy([{
-    // URL match rule for specific path request proxy
-    proxy_location: /^\/v1/.*/,
-    // target backend, different between with URL or not
-    proxy_pass: 'http://api.google.com'
-  }], { proxy_timeout: 50000 }
-));
+app.use(proxy({
+  proxy_rules: [
+    {
+      proxy_location: /^\/v(?:0|1)/,
+      proxy_pass: 'http://192.168.100.124'
+    }
+  ]
+}));
 app.use(serve(path.join(__dirname, 'static')));
 app.use(function *() {
     this.type = 'html';
@@ -73,8 +79,8 @@ app.listen(1336);
 ```
 
 ## Change Log
-+ 2015/06/01 v0.9.0
-Modify a more nginx style way, and maybe has several nodejs and iojs compatibility bug.
++ 2015/06/01 v0.10.0
+Modify into more nginx style, improve router functional match.
 + 2015/03/30 v0.7.2
 Fix fatal nodejs and iojs compatibility bug.
 + 2015/02/11 v0.7.0
