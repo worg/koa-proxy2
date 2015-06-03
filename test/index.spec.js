@@ -103,6 +103,30 @@ describe('proxy server', function () {
       })
   });
 
+  it('should execute error status when body parse error', function (done) {
+    app = koa();
+    app.use(function *(next) {
+      this.request.body = new Error('Placeholder');
+      yield next;
+    });
+    app.use(proxy({
+      proxy_rules: [{
+        proxy_location: '/version/',
+        proxy_pass: 'http://localhost:5000/proxy/'
+      }]
+    }));
+
+    proxy_server = http.createServer(app.callback()).listen(5001);
+
+    request
+      .get('http://localhost:5001/version/')
+      .query('title=webstorm&content=jetbrain')
+      .end(function(err, res) {
+        res.serverError.should.be.true;
+        done();
+      })
+  });
+
   afterEach(function () {
     proxy_server.close();
   });
