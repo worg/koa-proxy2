@@ -14,7 +14,7 @@ var multipart = require('./multipart');
  * Export several useful method
  * @module utils/utils
  * @author bornkiller <hjj491229492@hotmail.com>
- * @version v0.9.0
+ * @version v0.10.0
  * @license MIT
  * @copyright bornkiller NPM package 2014
  */
