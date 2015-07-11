@@ -21,16 +21,45 @@ The `proxy rule` act like followings:
 
 ```javascript
 {
-  // URL match rule for specific path request proxy
+  // URL match rule for specific path request proxy, required
   proxy_location: '/v1/version',
-  // target backend, different between with URL or not
-  proxy_pass: 'http://api.google.com'
+  // target backend, different between with URL or not, required
+  proxy_pass: 'http://api.google.com',
+  // whether the proxy_location within micro service
+  // when true, will remove the first path section, optional
+  proxy_micro_service: false,
+  // when active url merge mode, rather than default nginx proxy style 
+  // details see below, optional
+  proxy_merge_mode: false
 }
 ```
 
 `proxy_location` could be string or regular expression, when the original path match the string or regular expression, the proxy actived, otherwise, will just transfer the request next.
 
 `proxy_pass` has different behaviour just like nginx. The above example, request `/v1/version` will resolved into `http://api.google.com/v1/version`, while when proxy_pass equals `http://api.google.com/` or with specific path, the original request path will omit.
+
+`proxy_micro_service` will modify the URL, for example, when `true`, url path `/product/listProduct/` will become `/listProduct/`.
+
+`proxy_merge_mode` whether use url merge, for example:
+
+```
+var rules;
+
+// when request path '/world/user/'
+// final url 'http://www.reverseflower.com/list/'
+rules = [{
+    proxy_location: /user\/$/,
+    proxy_pass: 'http://www.reverseflower.com/list/'
+}];
+
+// when request path '/world/user/'
+// final url 'http://www.reverseflower.com/list/world/user/'
+rules = [{
+  proxy_location: /user\/$/,
+  proxy_pass: 'http://www.reverseflower.com/list/',
+  proxy_merge_mode: true
+}];
+```
 
 the `module configuration` act like belows:
 
@@ -47,7 +76,9 @@ the `module configuration` act like belows:
   // array consist of proxy rule, default []
   proxy_rules: [{
     proxy_location: '/version/',
-    proxy_pass: 'http://localhost:5000/proxy/'
+    proxy_pass: 'http://localhost:5000/proxy/',
+    proxy_micro_service: false,
+    proxy_merge_mode: false
   }]
 }
 ```
@@ -66,7 +97,9 @@ app.use(proxy({
   proxy_rules: [
     {
       proxy_location: /^\/v(?:0|1)/,
-      proxy_pass: 'http://192.168.100.124'
+      proxy_pass: 'http://192.168.100.124',
+      proxy_micro_service: false,
+      proxy_merge_mode: false
     }
   ]
 }));
