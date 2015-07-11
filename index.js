@@ -14,7 +14,7 @@ var utils = require('./utils/utils.js');
 
 /**
  * A module proxy requests with nginx style
- * @version v0.10.0
+ * @version v0.11.0
  * @author bornkiller <hjj491229492@hotmail.com>
  * @license MIT
  * @copyright bornkiller NPM package 2014

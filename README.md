@@ -112,6 +112,8 @@ app.listen(1336);
 ```
 
 ## Change Log
++ 2015/07/10 v0.11.0
+Add `proxy_micro_service`, `proxy_merge_mode` support.
 + 2015/06/01 v0.10.0
 Modify into more nginx style, improve router functional match.
 + 2015/03/30 v0.7.2
