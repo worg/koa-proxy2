@@ -10,31 +10,74 @@ var sinon = require('sinon');
 var utils = require('../utils/utils.js');
 
 describe('utils path resolve function', function () {
-  var rules = [
-    {
-      proxy_location: '/v1/version/',
-      proxy_pass: 'http://192.168.100.40'
-    },
-    {
-      proxy_location: /^\/hunter/,
-      proxy_pass: 'http://192.168.100.40'
-    },
-    {
-      proxy_location: /user\/$/,
-      proxy_pass: 'http://www.reverseflower.com/list/'
-    }
-  ];
+  var rules;
 
   it('should support exact math', function () {
+    rules = [{
+      proxy_location: '/v1/version/',
+      proxy_pass: 'http://192.168.100.40'
+    }];
+
     utils.resolvePath('/v1/version/', rules).should.equal('http://192.168.100.40/v1/version/');
   });
 
   it('should support regular expression math', function () {
+    rules = [{
+      proxy_location: /^\/hunter/,
+      proxy_pass: 'http://192.168.100.40'
+    }];
+
     utils.resolvePath('/hunter/animals/', rules).should.equal('http://192.168.100.40/hunter/animals/');
   });
 
-  it('should support proxy_pass with URL', function () {
-    utils.resolvePath('/list/user/', rules).should.equal('http://www.reverseflower.com/list/')
+  it('should support URL postfix', function () {
+    rules = [{
+      proxy_location: /user\/$/,
+      proxy_pass: 'http://www.reverseflower.com/list/'
+    }];
+
+    utils.resolvePath('/world/user/', rules).should.equal('http://www.reverseflower.com/list/')
+  });
+
+  it('should support URL postfix with proxy_merge_mode', function () {
+    rules = [{
+      proxy_location: /user\/$/,
+      proxy_pass: 'http://www.reverseflower.com/list/',
+      proxy_merge_mode: true
+    }];
+
+    utils.resolvePath('/world/user/', rules).should.equal('http://www.reverseflower.com/list/world/user/')
+  });
+
+  it('should support micro service', function () {
+    var rules = [{
+      proxy_location: '/product/listProduct/',
+      proxy_pass: 'http://www.reverseflower.com',
+      proxy_micro_service: true
+    }];
+
+    utils.resolvePath('/product/listProduct/', rules).should.equal('http://www.reverseflower.com/listProduct/')
+  });
+
+  it('should support micro service', function () {
+    var rules = [{
+      proxy_location: '/product/listProduct/',
+      proxy_pass: 'http://www.reverseflower.com',
+      proxy_micro_service: false
+    }];
+
+    utils.resolvePath('/product/listProduct/', rules).should.equal('http://www.reverseflower.com/product/listProduct/')
+  });
+
+  it('should support micro service with proxy merge mode', function () {
+    var rules = [{
+      proxy_location: '/orgApi/personal/credit/',
+      proxy_pass: 'http://www.reverseflower.com/api',
+      proxy_micro_service: true,
+      proxy_merge_mode: true
+    }];
+
+    utils.resolvePath('/orgApi/personal/credit/', rules).should.equal('http://www.reverseflower.com/api/personal/credit/')
   });
 
   it('should prompt false when mismatch', function () {
@@ -254,6 +297,36 @@ describe('utils should parse body', function () {
     delete context.request.body;
     options.body_parse = true;
     utils.shouldParseBody(context, options).should.be.true;
+  });
+});
+
+describe('utils mergeSafeUrl mode', function () {
+  var expect = 'https://github.com/bornkiller/koa-proxy2'
+    , source
+    , addition;
+
+  it('should support safe url merge', function () {
+    source = 'https://github.com/bornkiller';
+    addition = 'koa-proxy2';
+    utils.mergeSafeUrl(source, addition).should.equal(expect);
+  });
+
+  it('should support safe url merge', function () {
+    source = 'https://github.com/bornkiller/';
+    addition = '/koa-proxy2';
+    utils.mergeSafeUrl(source, addition).should.equal(expect);
+  });
+
+  it('should support safe url merge', function () {
+    source = 'https://github.com/bornkiller/';
+    addition = 'koa-proxy2';
+    utils.mergeSafeUrl(source, addition).should.equal(expect);
+  });
+
+  it('should support safe url merge', function () {
+    source = 'https://github.com/bornkiller';
+    addition = '/koa-proxy2';
+    utils.mergeSafeUrl(source, addition).should.equal(expect);
   });
 });
 

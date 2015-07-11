@@ -12,4 +12,18 @@ app.get('/proxy/', function(req, res) {
   }
 });
 
+app.get('/listProduct/', function(req, res) {
+  res.json({
+    "success": true,
+    "data": "Micro Service"
+  });
+});
+
+app.get('/product/listProduct/', function(req, res) {
+  res.json({
+    "success": true,
+    "data": "Not Micro Service"
+  });
+});
+
 module.exports = app;

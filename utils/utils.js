@@ -20,6 +20,25 @@ var multipart = require('./multipart');
  */
 
 /**
+ * @description normalize URL merge
+ * @param {string} origin - the specific url path
+ * @param {string} addition - another specific url path
+ * @returns {string}
+ */
+exports.mergeSafeUrl = function(origin, addition) {
+  switch (true) {
+    case origin.endsWith('/') && addition.startsWith('/'):
+      return origin + addition.slice(1);
+      break;
+    case !origin.endsWith('/') && !addition.startsWith('/'):
+      return origin + '/' + addition;
+      break;
+    default:
+      return origin + addition;
+  }
+};
+
+/**
  * @description resolve rules match, return final URL when match, false when mismatch
  * @param {string} path - the http request path
  * @param {object} rules - the map relationship between origin request path and real backend API
@@ -28,11 +47,18 @@ var multipart = require('./multipart');
 exports.resolvePath = function(path, rules) {
   assert.ok(util.isArray(rules), 'Array Rules Required');
   var result = _.find(rules, function(rule) {
-    return util.isRegExp(rule.proxy_location) ? rule.proxy_location.test(path) : rule.proxy_location === path;
-  });
+      return util.isRegExp(rule.proxy_location) ? rule.proxy_location.test(path) : rule.proxy_location === path;
+    })
+    , microServiceReg = /^\/(\w+)(\/?.*)$/
+    , location;
 
   if (!result) return false;
-  return result.proxy_pass.replace(new RegExp('https?:\/\/'), '').indexOf('/') === -1 ? result.proxy_pass + path : result.proxy_pass;
+
+  location = result.proxy_pass.replace(/^https?:\/\//, '');
+  if (location.indexOf('/') !== -1 && !result.proxy_merge_mode) return result.proxy_pass;
+  if (result.proxy_micro_service && microServiceReg.test(path)) path = microServiceReg.exec(path)[2];
+
+  return this.mergeSafeUrl(result.proxy_pass, path);
 };
 
 /**
