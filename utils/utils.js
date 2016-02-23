@@ -9,6 +9,7 @@ var util = require('util');
 var _ = require('underscore');
 var parse = require('co-body');
 var multipart = require('./multipart');
+var hostRegex = /[^\/]+(\w)\//; //regex to extract request host
 
 /**
  * Export several useful method
@@ -117,6 +118,9 @@ exports.configRequestOptions = function(self, options) {
     headers: self.header,
     qs: !!options.keep_query_string ? self.query : {}
   };
+
+  // forward host on request
+  opts.headers.host = hostRegex.test(opts.url) ? opts.url.match(hostRegex)[0].replace('/', '') : opts.host;
 
   switch (true) {
     case _.isEmpty(self.request.body):
